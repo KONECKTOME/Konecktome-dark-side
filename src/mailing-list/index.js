@@ -1,11 +1,14 @@
 const router = require('express').Router()
 const mailListModel = require('../mailing-list/schema')
 const mongoose = require('mongoose')
+const Nylas = require('nylas')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
-const mailchimpTx = require('@mailchimp/mailchimp_transactional')(
-    '37b25d80a403ffba449e2dab6e454f17-us6',
-)
-const nodemailer = require('nodemailer')
+
+Nylas.config({
+    clientId: '5rc6fcejch5pyjlhvwablxwsa',
+    clientSecret: '7twsxgnooio4wcj5433csstfo',
+})
+const nylas = Nylas.with('66NSRDMDP7y8lyaQVUaKI7erj3F78M')
 
 mailchimp.setConfig({
     apiKey: process.env.MAIL_CHIMP_API_KEY,
@@ -47,11 +50,6 @@ router.post('/marketing', async(req, res) => {
     const { name, email } = req.body
     try {
         const listId = process.env.MAIL_CHIMP_LIST_ID
-        const subscribingUser = {
-            firstName: 'Prudence',
-            lastName: 'McVankab',
-            email: 'findAssured@outlook.com',
-        }
         const response = await mailchimp.lists.addListMember(listId, {
             email_address: email,
             status: 'subscribed',
@@ -70,20 +68,24 @@ router.post('/marketing', async(req, res) => {
 })
 
 router.post('/transactional', async(req, res) => {
+    const { email, name } = req.body
     try {
-        const message = {
-            from_email: 'hello@example.com',
-            subject: 'Hello world',
-            text: 'Welcome to Mailchimp Transactional!',
-            to: [{
-                email: 'freddie@example.com',
-                type: 'to',
-            }, ],
-        }
-        const response = await mailchimpTx.messages.send({
-            message,
+        const draft = nylas.drafts.build({
+            subject: 'With Love, from Nylas',
+            body: 'This email was sent using the Nylas email API. Visit https://nylas.com for details.',
+            to: [{ name: name, email: email }],
         })
-        console.log(response)
+        draft.send().then((message) => {
+            if (message.folder.name === 'sent') {
+                res.json({
+                    meesage: 'Email sent',
+                })
+            } else {
+                res.json({
+                    message: 'Error sending email',
+                })
+            }
+        })
     } catch (error) {
         console.log(error)
     }

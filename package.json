@@ -26,6 +26,7 @@
         "mongoose": "^5.12.12",
         "nodemailer": "^6.6.1",
         "nodemon": "^2.0.7",
+        "nylas": "^5.4.0",
         "superagent": "^6.1.0"
     }
 }
