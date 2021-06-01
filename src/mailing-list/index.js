@@ -5,15 +5,24 @@ const Nylas = require('nylas')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
 
 Nylas.config({
-    clientId: '5rc6fcejch5pyjlhvwablxwsa',
-    clientSecret: '7twsxgnooio4wcj5433csstfo',
+    clientId: process.env.NYLAS_CLIENT_ID,
+    clientSecret: process.env.NYLAS_CLIENT_SECRET,
 })
-const nylas = Nylas.with('66NSRDMDP7y8lyaQVUaKI7erj3F78M')
+const nylas = Nylas.with(process.env.NYLAS_ACCESS_TOKEN)
 
 mailchimp.setConfig({
     apiKey: process.env.MAIL_CHIMP_API_KEY,
     server: process.env.MAIL_CHIMP_SERVER,
 })
+
+function isValidEmail(email) {
+    var mailformat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+    if (email.match(mailformat)) {
+        return true
+    } else {
+        return false
+    }
+}
 
 router.get('/', async(req, res) => {
     try {
@@ -26,20 +35,29 @@ router.get('/', async(req, res) => {
 
 router.post('/new-user', async(req, res) => {
     const { name, email } = req.body
+
     try {
-        const findUser = await mailListModel.find({ email: email })
-        if (findUser.length !== 0) {
+        if (name === '' || email === '') {
+            res.json({ message: "Text fields can't be empty" })
+        } else if (isValidEmail(email) === false) {
             res.json({
-                message: 'This email already exists',
+                message: 'Invalid email',
             })
         } else {
-            const newUser = await mailListModel.create({
-                name: name,
-                email: email,
-            })
-            res.json({
-                message: 'Sign up successful',
-            })
+            const findUser = await mailListModel.find({ email: email })
+            if (findUser.length !== 0) {
+                res.json({
+                    message: 'This email already exists',
+                })
+            } else {
+                const newUser = await mailListModel.create({
+                    name: name,
+                    email: email,
+                })
+                res.json({
+                    message: 'Sign up successful',
+                })
+            }
         }
     } catch (error) {
         console.log(error)
