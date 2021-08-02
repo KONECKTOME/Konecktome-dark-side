@@ -15,6 +15,24 @@ mailchimp.setConfig({
     server: process.env.MAIL_CHIMP_SERVER,
 })
 
+function paginator(items, current_page, per_page_items) {
+    let page = current_page || 1,
+        per_page = per_page_items || 10,
+        offset = (page - 1) * per_page,
+        paginatedItems = items.slice(offset).slice(0, per_page_items),
+        total_pages = Math.ceil(items.length / per_page)
+
+    return {
+        page: page,
+        per_page: per_page,
+        pre_page: page - 1 ? page - 1 : null,
+        next_page: total_pages > page ? page + 1 : null,
+        total: items.length,
+        total_pages: total_pages,
+        data: paginatedItems,
+    }
+}
+
 function isValidEmail(email) {
     var mailformat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
     if (email.match(mailformat)) {
@@ -107,6 +125,55 @@ router.post('/transactional', async(req, res) => {
     } catch (error) {
         console.log(error)
     }
+})
+
+router.post('/test', async(req, res) => {
+    let products = [{
+            id: 1,
+            name: 'Product 1',
+        },
+        {
+            id: 2,
+            name: 'Product 2',
+        },
+        {
+            id: 3,
+            name: 'Product 3',
+        },
+        {
+            id: 4,
+            name: 'Product 4',
+        },
+        {
+            id: 5,
+            name: 'Product 5',
+        },
+        {
+            id: 6,
+            name: 'Product 6',
+        },
+        {
+            id: 6,
+            name: 'Product 6',
+        },
+        {
+            id: 6,
+            name: 'Product 6',
+        },
+        {
+            id: 6,
+            name: 'Product 6',
+        },
+        {
+            id: 6,
+            name: 'Product 6',
+        },
+        {
+            id: 6,
+            name: 'Product 6',
+        },
+    ]
+    res.send(paginator(products, 3, 3))
 })
 
 module.exports = router
