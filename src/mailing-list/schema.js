@@ -1,10 +1,11 @@
-const { model, Schema } = require('mongoose')
+const { model, Schema } = require("mongoose");
 
 const mailListSchema = new Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-})
+  fName: { type: String, required: true },
+  lName: { type: String, required: true },
+  email: { type: String, required: true },
+});
 
-const mailistModel = model('mail-list', mailListSchema)
+const mailistModel = model("mail-list", mailListSchema);
 
-module.exports = mailistModel
+module.exports = mailistModel;
