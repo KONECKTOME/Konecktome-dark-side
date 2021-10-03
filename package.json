@@ -18,8 +18,10 @@
     },
     "homepage": "https://github.com/QAKANDE/Konecktome-dark-side#readme",
     "dependencies": {
-        "@mailchimp/mailchimp_marketing": "^3.0.43",
+        "@mailchimp/mailchimp_marketing": "^3.0.66",
         "@mailchimp/mailchimp_transactional": "^1.0.26",
+        "@sendgrid/mail": "^7.4.7",
+        "body-parser": "^1.19.0",
         "cors": "^2.8.5",
         "dotenv": "^10.0.0",
         "express": "^4.17.1",

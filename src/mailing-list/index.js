@@ -3,16 +3,12 @@ const mailListModel = require("../mailing-list/schema");
 const mongoose = require("mongoose");
 const Nylas = require("nylas");
 const mailchimp = require("@mailchimp/mailchimp_marketing");
-
-// Nylas.config({
-//     clientId: process.env.NYLAS_CLIENT_ID,
-//     clientSecret: process.env.NYLAS_CLIENT_SECRET,
-// })
-// const nylas = Nylas.with(process.env.NYLAS_ACCESS_TOKEN)
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.KONECKTOME_HELLO);
 
 mailchimp.setConfig({
   apiKey: process.env.MAIL_CHIMP_API_KEY,
-  server: process.env.MAIL_CHIMP_SERVER,
+  server: process.env.MAIL_CHIMP_SERVER_PREFIX,
 });
 
 function paginator(items, current_page, per_page_items) {
@@ -84,16 +80,18 @@ router.post("/new-user", async (req, res) => {
 });
 
 router.post("/marketing", async (req, res) => {
-  const { name, email } = req.body;
+  const { fName, lName, email } = req.body;
+
   try {
     const listId = process.env.MAIL_CHIMP_LIST_ID;
     const response = await mailchimp.lists.addListMember(listId, {
       email_address: email,
       status: "subscribed",
       merge_fields: {
-        FNAME: name,
+        FNAME: fName,
       },
     });
+
     if (response.statusCode === 400) {
       res.json({ message: "An errored in adding to mail list" });
     } else {
@@ -102,6 +100,28 @@ router.post("/marketing", async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+});
+
+router.post("/transactional", async (req, res) => {
+  const { fName, lName, email } = req.body;
+  const msg = {
+    to: email,
+    from: "hello@konecktome.com",
+    subject: "WELCOME TO KONECKTOME",
+    html: `<div>
+    Dear ${fName}, this is a test
+    </div>`,
+  };
+  sgMail
+    .send(msg)
+    .then(async () => {
+      res.json({
+        message: "Email sent",
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 });
 
 // router.post('/transactional', async(req, res) => {
@@ -127,55 +147,5 @@ router.post("/marketing", async (req, res) => {
 //         console.log(error)
 //     }
 // })
-
-router.post("/test", async (req, res) => {
-  let products = [
-    {
-      id: 1,
-      name: "Product 1",
-    },
-    {
-      id: 2,
-      name: "Product 2",
-    },
-    {
-      id: 3,
-      name: "Product 3",
-    },
-    {
-      id: 4,
-      name: "Product 4",
-    },
-    {
-      id: 5,
-      name: "Product 5",
-    },
-    {
-      id: 6,
-      name: "Product 6",
-    },
-    {
-      id: 6,
-      name: "Product 6",
-    },
-    {
-      id: 6,
-      name: "Product 6",
-    },
-    {
-      id: 6,
-      name: "Product 6",
-    },
-    {
-      id: 6,
-      name: "Product 6",
-    },
-    {
-      id: 6,
-      name: "Product 6",
-    },
-  ];
-  res.send(paginator(products, 3, 3));
-});
 
 module.exports = router;
