@@ -12,11 +12,14 @@ server.use(cors());
 server.use("/mail", mailList);
 
 mongoose
-  .connect("mongodb://localhost:27017/Konecktome", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-  })
+  .connect(
+    "mongodb+srv://bisbeauty:bisola@cluster0.lrljy.mongodb.net/Konecktome-beta?retryWrites=true&w=majority",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    }
+  )
   .then(
     server.listen(port, () => {
       console.log("Server is running on port", port);
