@@ -21,11 +21,16 @@ router.post("/newPageView", async (req, res) => {
     const last = first + 6;
     const firstday = new Date(curr.setDate(first)).toLocaleDateString();
     const lastday = new Date(curr.setDate(last)).toLocaleDateString();
-    const today = curr.toLocaleDateString("en-GB", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
+    var dd = curr.getDay() + 2;
+    var mm = curr.getMonth() + 1;
+    var yyyy = curr.getFullYear();
+    const today = dd + "/" + mm + "/" + yyyy;
+    // const today = curr.toLocaleDateString("en-GB", {
+    //   year: "numeric",
+    //   month: "2-digit",
+    //   day: "2-digit",
+    // });
+
     const daysInWeek = firstday + " - " + lastday;
     let foundReport = await pageViewsSchema.findOne({ daysInWeek });
     if (foundReport) {
@@ -65,6 +70,7 @@ router.post("/newPageView", async (req, res) => {
         ],
         totalPageViews: 1,
       });
+
       res.json({
         message: newPageView,
       });
