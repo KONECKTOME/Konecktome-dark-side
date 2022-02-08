@@ -93,7 +93,6 @@ router.post("/marketing", async (req, res) => {
     });
 
     if (response.statusCode === 400) {
-      console.log("error");
       res.json({ message: "An errored in adding to mail list" });
     } else {
       console.log("sucess");
