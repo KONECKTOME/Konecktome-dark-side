@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const mongoose = require("mongoose");
 const pageViewsSchema = require("../Reports/schema");
+const { format } = require("date-fns");
 
 router.get("/", async (req, res) => {
   try {
@@ -21,17 +22,16 @@ router.post("/newPageView", async (req, res) => {
     const last = first + 6;
     const firstday = new Date(curr.setDate(first)).toLocaleDateString();
     const lastday = new Date(curr.setDate(last)).toLocaleDateString();
-    var dd = curr.getDay() + 2;
-    var mm = curr.getMonth() + 1;
-    var yyyy = curr.getFullYear();
-    const today = dd + "/" + mm + "/" + yyyy;
-    // const today = curr.toLocaleDateString("en-GB", {
+    // const today = dd + "/" + mm + "/" + yyyy;
+    // const today2 = curr.toLocaleDateString("en-GB", {
     //   year: "numeric",
     //   month: "2-digit",
     //   day: "2-digit",
     // });
-
+    // const today = format(new Date(), "dd/MM/yyyy");
+    const today = "11/02/2022";
     const daysInWeek = firstday + " - " + lastday;
+
     let foundReport = await pageViewsSchema.findOne({ daysInWeek });
     if (foundReport) {
       let itemIndex = foundReport.report.findIndex((p) => p.date === today);
