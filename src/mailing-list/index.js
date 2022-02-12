@@ -91,11 +91,9 @@ router.post("/marketing", async (req, res) => {
         FNAME: fName,
       },
     });
-
     if (response.statusCode === 400) {
       res.json({ message: "An errored in adding to mail list" });
     } else {
-      console.log("sucess");
       res.json({ message: "Successfully added to mail list" });
     }
   } catch (error) {
@@ -108,14 +106,15 @@ router.post("/transactional", async (req, res) => {
 
   const msg = {
     to: email,
-    from: "hello@konecktome.com",
+    from: "timothy.mide@konecktome.com",
     subject: "Let’s begin our journey together",
     html: `<div>
     <h3>Congratulations ${fName}, welcome to the KONECKTOME family!</h3>
     <p>If you’re receiving this email, it means you’re now officially a proud member of the KONECKTOME family! </p>
     <p> We’re extremely excited you’re able to be part of our ‘Road To Launch’ journey where you’ll get to know and experience what being part of our family means and what we stand for.
            Expect some exciting and engaging content coming your way that will make you feel more ‘koneckted’ than ever before.</p>
-      <p>Stop yourself from missing out on awesome content by making sure you’ve got our email address saved to your contact or address book. This stops our emails from being accidentally marked as spam when you receive them.</p>
+      <p>Stop yourself from missing out on awesome content by making sure you’ve got our email address saved to your contact or address book. 
+             This stops our emails from being accidentally marked as spam when you receive them.</p>
       <p>Why not also invite your friends and family to be part of our awesome family journey.</p>
     <p>Catch you soon,</p>
     <p>The founding team</p>
@@ -127,7 +126,6 @@ router.post("/transactional", async (req, res) => {
       res.json({
         message: "Email sent",
       });
-      console.log("worked");
     })
     .catch((error) => {
       console.error(error);
