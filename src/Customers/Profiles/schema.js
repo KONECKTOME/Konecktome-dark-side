@@ -61,7 +61,7 @@ const userProfile = new Schema({
       serviceProviderName: { type: String },
       serviceType: { type: String },
       price: { type: Number },
-      desc: { type: String },
+      description: { type: String },
     },
   ],
 });
