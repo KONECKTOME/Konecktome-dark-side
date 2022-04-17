@@ -66,29 +66,49 @@ router.post("/update-accounts", async (req, res) => {
           accountItem.description = description;
           accountItem.price = price;
         } else {
-          accountItem.companyId = companyId;
-          accountItem.serviceProviderName = serviceProviderName;
-          accountItem.serviceType = serviceType;
-          accountItem.joinDate = joinDate;
-          accountItem.description = description;
-          accountItem.price = price;
+          findUser.accounts.push({
+            companyId,
+            serviceProviderName,
+            serviceType,
+            joinDate,
+            description,
+            price,
+          });
         }
         findUser = await findUser.save();
-        res.send("Account updated");
-      } else {
-        findUser.accounts.push({
-          companyId,
-          serviceProviderName,
-          serviceType,
-          joinDate,
-          description,
-          price,
-        });
-        findUser = await findUser.save();
         res.json({
-          message: "User account updated",
+          message: "New account added for user",
         });
       }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/update-wishlist", async (req, res) => {
+  try {
+    const {
+      userId,
+      companyId,
+      serviceProviderName,
+      serviceType,
+      price,
+      description,
+    } = req.body;
+    let findUser = await usersModel.findById(userId);
+    if (findUser) {
+      findUser.wishlist.push({
+        companyId,
+        serviceProviderName,
+        serviceType,
+        price,
+        description,
+      });
+      findUser = await findUser.save();
+      res.json({
+        message: "New wishlist added for user",
+      });
     }
   } catch (error) {
     console.log(error);
