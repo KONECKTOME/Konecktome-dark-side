@@ -41,6 +41,41 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.put("/update-address", async (req, res) => {
+  try {
+    const {
+      userId,
+      addressLine1,
+      addressLine2,
+      postCode,
+      profession,
+      phoneNumber,
+    } = req.body;
+
+    let findUser = await usersModel.findOneAndUpdate(
+      { _id: userId },
+      {
+        phone: phoneNumber,
+        profession,
+        addressLine1,
+        addressLine2,
+        postCode,
+      }
+    );
+    if (findUser) {
+      res.json({
+        message: "User address updated!",
+      });
+    } else {
+      res.json({
+        message: "ERROR!",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 router.post("/update-accounts", async (req, res) => {
   try {
     const {
@@ -86,6 +121,58 @@ router.post("/update-accounts", async (req, res) => {
   }
 });
 
+router.post("/add-new-card-details", async (req, res) => {
+  try {
+    const { userId, cardNumber, expiryDate, cvc, cardHolderName, cardId } =
+      req.body;
+    let findUser = await usersModel.findById(userId);
+    console.log(cardId);
+    if (findUser) {
+      if (findUser.paymentDetails.length !== 0) {
+        console.log(findUser.paymentDetails);
+        const filter = findUser.paymentDetails.filter((p) => p._id === cardId);
+        console.log(filter);
+        let itemIndex = findUser.paymentDetails.findIndex(
+          (p) => p._id === cardId
+        );
+        console.log(itemIndex);
+        if (itemIndex > -1) {
+          let cardItem = findUser.paymentDetails[itemIndex];
+          cardItem.cardNumber = cardNumber;
+          cardItem.expiryDate = expiryDate;
+          cardItem.cvc = cvc;
+          cardItem.expiryDate = expiryDate;
+          cardItem.cardHolderName = cardHolderName;
+        } else {
+          findUser.paymentDetails.push({
+            cardNumber,
+            expiryDate,
+            cvc,
+            cardHolderName,
+          });
+        }
+        findUser = await findUser.save();
+        res.json({
+          message: "New card added for user",
+        });
+      } else {
+        findUser.paymentDetails.push({
+          cardNumber,
+          expiryDate,
+          cvc,
+          cardHolderName,
+        });
+        findUser = await findUser.save();
+        res.json({
+          message: "New card added for user",
+        });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 router.post("/update-wishlist", async (req, res) => {
   try {
     const {
@@ -109,6 +196,81 @@ router.post("/update-wishlist", async (req, res) => {
       res.json({
         message: "New wishlist added for user",
       });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/update-family-members", async (req, res) => {
+  try {
+    const {
+      userId,
+      familyMemberId,
+      familyMemberName,
+      serviceProviderID,
+      serviceName,
+      serviceProviderName,
+      totalPrice,
+    } = req.body;
+    let findUser = await usersModel.findById(userId);
+    console.log(findUser.splitBillFamilyMembers.groupingByService);
+    if (findUser) {
+      if (
+        findUser.splitBillFamilyMembers.length === 0 ||
+        serviceName !==
+          findUser.splitBillFamilyMembers.groupingByService.serviceName
+      ) {
+        const pricePerFamilyMember = totalPrice / 2;
+        findUser.splitBillFamilyMembers.push({
+          groupingByService: [
+            {
+              serviceProviderID,
+              serviceName,
+              serviceProviderName,
+              totalPrice,
+              pricePerFamilyMember,
+              familyMembers: [
+                {
+                  familyMemberId,
+                  familyMemberName,
+                },
+              ],
+            },
+          ],
+        });
+        findUser = await findUser.save();
+        res.json({
+          message: "New family member added for user",
+        });
+      } else {
+        if (
+          serviceName ===
+          findUser.splitBillFamilyMembers.groupingByService.serviceName
+        ) {
+          findUser.splitBillFamilyMembers.groupingByService.push({
+            familyMembers: [
+              {
+                familyMemberId,
+                familyMemberName,
+              },
+            ],
+          });
+          let itemIndex = findUser.splitBillFamilyMembers.groupingByService(
+            (p) => p.serviceName === serviceName
+          );
+          let serviceItem =
+            findUser.splitBillFamilyMembers.groupingByService[itemIndex];
+          serviceItem.pricePerFamilyMember =
+            serviceItem.totalPrice /
+            findUser.splitBillFamilyMembers.groupingByService.familyMembers
+              .length;
+        }
+        findUser = await findUser.save();
+        res.json({
+          message: "New family member added for user",
+        });
+      }
     }
   } catch (error) {
     console.log(error);

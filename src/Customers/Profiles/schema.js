@@ -13,8 +13,21 @@ const userProfile = new Schema({
   imageUrl: { type: String },
   splitBillFamilyMembers: [
     {
-      familyMemberId: { type: String },
-      name: { type: String },
+      groupingByService: [
+        {
+          serviceProviderID: { type: String },
+          serviceName: { type: String },
+          serviceProviderName: { type: String },
+          totalPrice: { type: Number },
+          pricePerFamilyMember: { type: Number },
+          familyMembers: [
+            {
+              familyMemberId: { type: String },
+              familyMemberName: { type: String },
+            },
+          ],
+        },
+      ],
     },
   ],
   accounts: [
