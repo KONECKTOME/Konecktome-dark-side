@@ -1,10 +1,18 @@
 const { model, Schema } = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userProfile = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  email: { type: String, required: true },
-  password: { type: String, required: true },
+  email: {
+    type: String,
+    required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 7,
+  },
   phone: { type: Number },
   profession: { type: String },
   addressLine1: { type: String },
@@ -77,6 +85,41 @@ const userProfile = new Schema({
       description: { type: String },
     },
   ],
+});
+
+userProfile.statics.findByCredentials = async (email, password) => {
+  const user = await usersProfileModel.findOne({ email });
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    const err = new Error("Unable to login");
+    err.httpStatusCode = 401;
+    throw err;
+  }
+  return user;
+};
+userProfile.pre("save", async function (next) {
+  const user = this;
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 8);
+  }
+  next();
+});
+userProfile.post("validate", function (error, doc, next) {
+  if (error) {
+    error.httpStatusCode = 400;
+    next(error);
+  } else {
+    next();
+  }
+});
+
+userProfile.post("save", function (error, doc, next) {
+  if (error.name === "MongoError" && error.code === 11000) {
+    error.httpStatusCode = 400;
+    next(error);
+  } else {
+    next();
+  }
 });
 
 const usersProfileModel = model("Users", userProfile);

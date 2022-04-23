@@ -22,15 +22,21 @@
     "@mailchimp/mailchimp_marketing": "^3.0.66",
     "@mailchimp/mailchimp_transactional": "^1.0.26",
     "@sendgrid/mail": "^7.4.7",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "cloudinary": "^1.29.1",
     "cors": "^2.8.5",
     "date-fns": "^2.28.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "express-list-endpoints": "^6.0.0",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.12.12",
     "nodemailer": "^6.6.1",
     "nodemon": "^2.0.7",
     "nylas": "^5.4.0",
+    "passport": "^0.5.2",
+    "passport-google-oauth2": "^0.2.0",
     "superagent": "^6.1.0"
   }
 }

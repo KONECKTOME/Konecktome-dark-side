@@ -6,6 +6,8 @@ const report = require("./Reports/index");
 const users = require("./Customers/Profiles/index");
 const cors = require("cors");
 const server = express();
+const listEndpoints = require("express-list-endpoints");
+
 const port = process.env.PORT || 3002;
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
@@ -14,6 +16,10 @@ server.use(cors());
 server.use("/users", users);
 server.use("/mail", mailList);
 server.use("/reporting", report);
+// console.log("endpoints", listEndpoints(server));
+
+// var token = require("crypto").randomBytes(48).toString("hex");
+// console.log(token);
 
 mongoose
   .connect("mongodb://localhost:27017/Konecktome", {
