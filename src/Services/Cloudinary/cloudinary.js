@@ -2,9 +2,9 @@ const usersModel = require("../../Customers/Profiles/schema");
 
 var cloudinary = require("cloudinary").v2;
 cloudinary.config({
-  cloud_name: "konecktome",
-  api_key: "375224759795671",
-  api_secret: "c2npqYhvQSQ5Y62yE2f5lKuV4lU",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const uploads = (file) => {
