@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
-const profileModel = require("../Customers/Profiles/schema");
-const { verifyJWT } = require("../Customers/Profiles/authTools");
+const profileModel = require("../../Customers/Profiles/schema");
+
+const { verifyJWT } = require("../OAuth/authTools");
 
 const authorize = async (req, res, next) => {
   try {

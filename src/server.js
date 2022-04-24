@@ -10,7 +10,7 @@ const listEndpoints = require("express-list-endpoints");
 
 const port = process.env.PORT || 3002;
 server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({ extended: true }));
+server.use(bodyParser.urlencoded({ extended: false }));
 server.use(express.json());
 server.use(cors());
 server.use("/users", users);

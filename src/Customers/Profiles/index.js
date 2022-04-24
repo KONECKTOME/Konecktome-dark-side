@@ -1,17 +1,15 @@
 const router = require("express").Router();
 const usersModel = require("./schema");
-const { authenticate, refreshToken, generateToken } = require("./authTools");
-const { authorize } = require("../../Middlewares/authorize");
-const { application, json } = require("express");
+const {
+  refreshToken,
+  generateToken,
+} = require("../../Services/OAuth/authTools");
+const { authorize } = require("../../Services/Middlewares/authorize");
 const passport = require("passport");
-require("./OAuth/googleAuth")(passport);
-var cloudinary = require("cloudinary").v2;
-
-cloudinary.config({
-  cloud_name: "konecktome",
-  api_key: "375224759795671",
-  api_secret: "c2npqYhvQSQ5Y62yE2f5lKuV4lU",
-});
+require("../../Services/OAuth/googleAuth")(passport);
+const { crawler } = require("../../Services/Web Crawler/crawler");
+const multer = require("../../Services/Cloudinary/multer");
+const cloudinary = require("../../Services/Cloudinary/cloudinary");
 
 router.get("/", async (req, res) => {
   try {
@@ -313,41 +311,47 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
     failureRedirect: "/fail",
-    failureMessage: true,
   }),
   (req, res) => {
-    res.redirect("/success");
+    res.redirect("/users/success");
   }
 );
 
 router.get("/success", (req, res) => {
-  console.log(req);
-  res.send("Welcome");
+  console.log(extractProfile);
 });
 router.get("/fail", (req, res) => {
-  console.log(req);
   res.send("fail");
 });
 
-router.post("image-upload", async (req, res) => {
+router.post("/image-upload", multer.single("image"), async (req, res) => {
   try {
-    cloudinary.v2.uploader.upload(
-      "https://upload.wikimedia.org/wikipedia/commons/a/ae/Olympic_flag.jpg",
-      { public_id: "olympic_flag" },
-      function (error, result) {
-        console.log(result);
-      }
-    );
+    const { userId } = req.body;
+    const result = await cloudinary.uploads(req.file.path);
+    if (result) {
+      const updateImage = await usersModel.findByIdAndUpdate(
+        { _id: userId },
+        { imageUrl: result.url }
+      );
+      res.json({
+        message: "Image added successfully",
+      });
+    } else {
+      res.json({
+        message: "An error occured while uploading image",
+      });
+    }
   } catch (error) {
     console.log(error);
   }
 });
-cloudinary.v2.uploader.upload(
-  "https://upload.wikimedia.org/wikipedia/commons/a/ae/Olympic_flag.jpg",
-  { public_id: "olympic_flag" },
-  function (error, result) {
-    console.log(result);
-  }
-);
+
+// router.get("/test-crawler", async (req, res) => {
+//   try {
+//     const crawl = await crawler();
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
 
 module.exports = router;

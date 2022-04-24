@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
-const profileModel = require("./schema");
+const profileModel = require("../../Customers/Profiles/schema");
+
 const generateToken = async (user) => {
   try {
     const newAccessToken = await generateJWT({ _id: user._id });
