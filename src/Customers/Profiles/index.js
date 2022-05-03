@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
     console.log(error);
   }
 });
-
+// -----  LOGIN AND SIGN UP ------ //
 router.post("/sign-up", async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
@@ -58,12 +58,17 @@ router.post("/login", async (req, res) => {
     console.log(error);
   }
 });
+
 router.get("/get-user-after-login", authorize, async (req, res, next) => {
   try {
   } catch (error) {
     console.log(error);
   }
 });
+
+// ----- END OF LOGIN AND SIGN UP ------ //
+
+// ----- DOB, PROFESSION, AGE, PHONE, GENDER ------ //
 
 router.post("/update-dob-profession", async (req, res) => {
   try {
@@ -110,6 +115,9 @@ router.post("/update-dob-profession", async (req, res) => {
   }
 });
 
+// -----END OF DOB, PROFESSION, AGE, PHONE, GENDER ------ //
+
+// ----- ADDRESS AND THREE YEAR MARGIN ------ //
 router.post("/update-address", async (req, res) => {
   try {
     let {
@@ -290,6 +298,9 @@ router.post("/update-address", async (req, res) => {
   }
 });
 
+// ----- END OF ADDRESS AND THREE YEAR MARGIN ------ //
+
+// ----- UPDATE ACCOUNTS ------ //
 router.post("/update-accounts", async (req, res) => {
   try {
     const {
@@ -334,6 +345,10 @@ router.post("/update-accounts", async (req, res) => {
     console.log(error);
   }
 });
+
+// ----- END OF UPDATE ACCOUNTS ------ //
+
+// ----- CARD DETAILS ------ //
 
 router.post("/add-new-card-details", async (req, res) => {
   try {
@@ -390,6 +405,10 @@ router.post("/add-new-card-details", async (req, res) => {
   }
 });
 
+// ----- END OF CARD DETAILS ------ //
+
+// ----- WISHLIST ------ //
+
 router.post("/update-wishlist", async (req, res) => {
   try {
     const {
@@ -419,6 +438,9 @@ router.post("/update-wishlist", async (req, res) => {
   }
 });
 
+// ----- END OF WISHLIST ------ //
+
+// ----- SPLIT BILL ------ //
 router.post("/update-family-members", async (req, res) => {
   try {
     const {
@@ -494,6 +516,10 @@ router.post("/update-family-members", async (req, res) => {
   }
 });
 
+// -----END OF  SPLIT BILL ------ //
+
+// ----- OAUTHS ------ //
+
 router.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["email", "profile"] })
@@ -544,6 +570,10 @@ router.get("/facebook-success", async (req, res) => {
   console.log("success facebook");
 });
 
+// ----- END OF OAUTHS ------ //
+
+// ----- IMAGE UPLOAD ------ //
+
 router.post("/image-upload", multer.single("image"), async (req, res) => {
   try {
     const { userId } = req.body;
@@ -565,6 +595,8 @@ router.post("/image-upload", multer.single("image"), async (req, res) => {
     console.log(error);
   }
 });
+
+// ----- END IMAGE UPLOAD ------ //
 
 // router.get("/test-crawler", async (req, res) => {
 //   try {
