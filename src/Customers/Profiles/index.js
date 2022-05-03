@@ -7,9 +7,11 @@ const {
 const { authorize } = require("../../Services/Middlewares/authorize");
 const passport = require("passport");
 require("../../Services/OAuth/googleAuth")(passport);
+require("../../Services/OAuth/FacebookAuth")(passport);
 const { crawler } = require("../../Services/Web Crawler/crawler");
 const multer = require("../../Services/Cloudinary/multer");
 const cloudinary = require("../../Services/Cloudinary/cloudinary");
+const moment = require("moment");
 
 router.get("/", async (req, res) => {
   try {
@@ -63,34 +65,224 @@ router.get("/get-user-after-login", authorize, async (req, res, next) => {
   }
 });
 
-router.put("/update-address", async (req, res) => {
+router.post("/update-dob-profession", async (req, res) => {
   try {
-    const {
-      userId,
-      addressLine1,
-      addressLine2,
-      postCode,
-      profession,
-      phoneNumber,
-    } = req.body;
+    const { userId, dob, profession, phone, gender } = req.body;
+    let dateOfBirth = dob.split("-").reverse();
+    let dateOfBirthInArray = [];
+    let currDateInArr = [];
+    dateOfBirth.forEach((str) => {
+      return dateOfBirthInArray.push(Number(str));
+    });
 
+    let currDate = new Date().toLocaleDateString().split("/").reverse();
+    currDate.forEach((str) => {
+      return currDateInArr.push(Number(str));
+    });
+
+    let differenceInDates = moment(currDateInArr).diff(
+      moment(dateOfBirthInArray),
+      "months"
+    );
+    let age = differenceInDates / 12;
     let findUser = await usersModel.findOneAndUpdate(
       { _id: userId },
       {
-        phone: phoneNumber,
+        userId,
+        dob,
         profession,
-        addressLine1,
-        addressLine2,
-        postCode,
+        phone,
+        gender,
+        age: parseInt(age),
       }
     );
     if (findUser) {
       res.json({
-        message: "User address updated!",
+        message: "User profession and co updated!",
       });
     } else {
       res.json({
         message: "ERROR!",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/update-address", async (req, res) => {
+  try {
+    let {
+      userId,
+      addressLine1,
+      addressLine2,
+      currentAddress,
+      postCode,
+      dateOfArrival,
+      dateOfDeparture,
+    } = req.body;
+    let findUser = await usersModel.findById(userId);
+    if (findUser) {
+      let itemIndex = findUser.addressHistory.findIndex(
+        (p) => p.addressLine1 === addressLine1
+      );
+      if (itemIndex > -1) {
+        res.json({
+          message: "Address already exists",
+        });
+      } else {
+        let allExistingDurationInMonths = "";
+        if (findUser.addressHistory.length === 0) {
+          let durationOfStay = "";
+          let dateOfArrivalInArray = [];
+          let dateOfDepartureInArray = [];
+          let dateOfArrivalInString = dateOfArrival.split("-");
+          let dateOfDepartureInString = dateOfDeparture.split("-");
+          dateOfArrivalInString.reverse().forEach((str) => {
+            dateOfArrivalInArray.push(Number(str));
+          });
+          dateOfDepartureInString.reverse().forEach((str) => {
+            dateOfDepartureInArray.push(Number(str));
+          });
+          let differenceInDates = moment(dateOfDepartureInArray).diff(
+            moment(dateOfArrivalInArray),
+            "months"
+          );
+
+          if (differenceInDates > 12) {
+            let numberOfYears = differenceInDates / 12;
+            let numberOfYearsSplit = numberOfYears.toString().split(".")[0];
+            let numberOfMonths =
+              Number(numberOfYears.toString().split(".")[1].split("")[0]) + 1;
+            durationOfStay =
+              numberOfYearsSplit +
+              " " +
+              "year(s)" +
+              " " +
+              numberOfMonths +
+              " " +
+              "month(s)";
+          } else {
+            durationOfStay = differenceInDates + " " + "month(s)";
+          }
+          if (Number(differenceInDates) > 36) {
+            await usersModel.findOneAndUpdate(
+              { _id: userId },
+              {
+                meets3yearMargin: true,
+              }
+            );
+            findUser.addressHistory.push({
+              addressLine1,
+              addressLine2,
+              postCode,
+              currentAddress,
+              dateOfArrival,
+              dateOfDeparture,
+              durationOfStay,
+              durationOfStayInMonths: differenceInDates,
+            });
+            findUser = await findUser.save();
+            res.json({
+              message: "Address added ",
+            });
+          } else {
+            findUser.addressHistory.push({
+              addressLine1,
+              addressLine2,
+              postCode,
+              currentAddress,
+              dateOfArrival,
+              dateOfDeparture,
+              durationOfStay,
+              durationOfStayInMonths: differenceInDates,
+            });
+            findUser = await findUser.save();
+            res.json({
+              message: "Address added ",
+            });
+          }
+        } else {
+          allExistingDurationInMonths = findUser.addressHistory
+            .map((item) => parseInt(item.durationOfStayInMonths))
+            .reduce((acc, next) => acc + next);
+          let durationOfStay = "";
+          let dateOfArrivalInArray = [];
+          let dateOfDepartureInArray = [];
+          let dateOfArrivalInString = dateOfArrival.split("-");
+          let dateOfDepartureInString = dateOfDeparture.split("-");
+          dateOfArrivalInString.reverse().forEach((str) => {
+            dateOfArrivalInArray.push(Number(str));
+          });
+          dateOfDepartureInString.reverse().forEach((str) => {
+            dateOfDepartureInArray.push(Number(str));
+          });
+          let differenceInDates = moment(dateOfDepartureInArray).diff(
+            moment(dateOfArrivalInArray),
+            "months"
+          );
+          let addDurationOfStayInMonths =
+            allExistingDurationInMonths + differenceInDates;
+          console.log(addDurationOfStayInMonths);
+
+          if (differenceInDates > 12) {
+            let numberOfYears = differenceInDates / 12;
+            let numberOfYearsSplit = numberOfYears.toString().split(".")[0];
+            let numberOfMonths =
+              Number(numberOfYears.toString().split(".")[1].split("")[0]) + 1;
+            durationOfStay =
+              numberOfYearsSplit +
+              " " +
+              "year(s)" +
+              " " +
+              numberOfMonths +
+              " " +
+              "month(s)";
+          } else {
+            durationOfStay = differenceInDates + " " + "month(s)";
+          }
+          if (addDurationOfStayInMonths >= 36) {
+            await usersModel.findOneAndUpdate(
+              { _id: userId },
+              {
+                meets3yearMargin: true,
+              }
+            );
+            findUser.addressHistory.push({
+              addressLine1,
+              addressLine2,
+              postCode,
+              currentAddress,
+              dateOfArrival,
+              dateOfDeparture,
+              durationOfStay,
+              durationOfStayInMonths: differenceInDates,
+            });
+            findUser = await findUser.save();
+            res.json({
+              message: "Address added ",
+            });
+          } else {
+            findUser.addressHistory.push({
+              addressLine1,
+              addressLine2,
+              postCode,
+              currentAddress,
+              dateOfArrival,
+              dateOfDeparture,
+              durationOfStay,
+              durationOfStayInMonths: differenceInDates,
+            });
+            findUser = await findUser.save();
+            res.json({
+              message: "Address added ",
+            });
+          }
+        }
+      }
+    } else {
+      res.json({
+        message: "User not found",
       });
     }
   } catch (error) {
@@ -322,6 +514,34 @@ router.get("/success", (req, res) => {
 });
 router.get("/fail", (req, res) => {
   res.send("fail");
+});
+
+router.get("/auth/facebook", passport.authenticate("facebook"));
+
+router.get(
+  "/login/facebook",
+  passport.authenticate("facebook", {
+    scope: ["email", "profile"],
+  })
+);
+
+router.get(
+  "/oauth2/redirect/facebook",
+  passport.authenticate("facebook", {
+    failureRedirect: "/facebook-fail",
+    failureMessage: true,
+  }),
+  function (req, res) {
+    res.redirect("/users/facebook-success");
+  }
+);
+
+router.get("/facebook-fail", async (req, res) => {
+  console.log("failed facebook");
+});
+
+router.get("/facebook-success", async (req, res) => {
+  console.log("success facebook");
 });
 
 router.post("/image-upload", multer.single("image"), async (req, res) => {

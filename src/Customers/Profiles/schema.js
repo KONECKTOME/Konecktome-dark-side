@@ -6,7 +6,6 @@ const userProfile = new Schema({
   lastName: { type: String, required: true },
   email: {
     type: String,
-    required: true,
   },
   password: {
     type: String,
@@ -15,10 +14,12 @@ const userProfile = new Schema({
   },
   phone: { type: Number },
   profession: { type: String },
-  addressLine1: { type: String },
-  addressLine2: { type: String },
-  postCode: { type: String },
+  dob: { type: String },
+  age: { type: Number },
   imageUrl: { type: String },
+  gender: { type: String },
+  facebookId: { type: Number },
+  meets3yearMargin: { type: Boolean },
   splitBillFamilyMembers: [
     {
       groupingByService: [
@@ -46,6 +47,18 @@ const userProfile = new Schema({
       joinDate: { type: String },
       description: { type: String },
       price: { type: Number },
+    },
+  ],
+  addressHistory: [
+    {
+      addressLine1: { type: String },
+      addressLine2: { type: String },
+      postCode: { type: String },
+      currentAddress: { type: Boolean },
+      dateOfArrival: { type: String },
+      dateOfDeparture: { type: String },
+      durationOfStay: { type: String },
+      durationOfStayInMonths: { type: String },
     },
   ],
   paymentDetails: [
