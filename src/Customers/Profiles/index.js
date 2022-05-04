@@ -11,6 +11,7 @@ require("../../Services/OAuth/FacebookAuth")(passport);
 const multer = require("../../Services/Cloudinary/multer");
 const cloudinary = require("../../Services/Cloudinary/cloudinary");
 const moment = require("moment");
+const validator = require("../../Services/Validators/validator");
 
 router.get("/", async (req, res) => {
   try {
@@ -24,19 +25,25 @@ router.get("/", async (req, res) => {
 router.post("/sign-up", async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
-    const user = await usersModel.find({ email: email });
-    if (user.length > 0) {
+    if (validator.isValidEmail(email) === false) {
       res.json({
-        message: "Email already exists",
+        message: "Invalid email",
       });
     } else {
-      const newUser = await usersModel.create({
-        firstName,
-        lastName,
-        email,
-        password,
-      });
-      res.status(201).send(newUser._id);
+      const user = await usersModel.find({ email: email });
+      if (user.length > 0) {
+        res.json({
+          message: "Email already exists",
+        });
+      } else {
+        const newUser = await usersModel.create({
+          firstName,
+          lastName,
+          email,
+          password,
+        });
+        res.status(201).send(newUser._id);
+      }
     }
   } catch (error) {
     console.log(error);
@@ -624,6 +631,48 @@ router.post("/image-upload", multer.single("image"), async (req, res) => {
 // ----- TRANSACTION HISTORY ------ //
 router.post("/update-transaction-history", async (req, res) => {
   try {
+    const {
+      companyId,
+      serviceProviderName,
+      dealName,
+      nextDueDate,
+      price,
+      description,
+      userId,
+    } = req.body;
+    const todayDate = new Date().toLocaleDateString();
+    var time =
+      new Date().getHours() +
+      ":" +
+      new Date().getMinutes() +
+      ":" +
+      new Date().getSeconds();
+    let findUser = await usersModel.findById(userId);
+    if (findUser) {
+      findUser.transactionHistory.push({
+        companyId,
+        serviceProviderName,
+        dealName,
+        dateOfTransaction: todayDate,
+        timeOfTransaction: time,
+        nextDueDate,
+        price,
+        description,
+      });
+      findUser = await findUser.save();
+      res.json({
+        message: "New transaction added for user",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+// ----- END OF TRANSACTION HISTORY ------ //
+
+// ----- NOTIFICATION ------ //
+router.post("/update-notification", async (req, res) => {
+  try {
     const { userId, message, date, messageStatus, title } = req.body;
     let findUser = await usersModel.findById(userId);
     if (findUser) {
@@ -638,18 +687,6 @@ router.post("/update-transaction-history", async (req, res) => {
         message: "New notification added for user",
       });
     }
-  } catch (error) {
-    console.log(error);
-  }
-});
-// ----- END OF TRANSACTION HISTORY ------ //
-
-// ----- NOTIFICATION ------ //
-router.get("/test-crawler", async (req, res) => {
-  try {
-    const { url } = req.body;
-    const channelData = await crawler.scrapeChannel(url);
-    res.send(channelData);
   } catch (error) {
     console.log(error);
   }

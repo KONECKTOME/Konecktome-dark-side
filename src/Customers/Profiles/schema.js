@@ -90,8 +90,9 @@ const userProfile = new Schema({
     {
       companyId: { type: String },
       serviceProviderName: { type: String },
-      serviceType: { type: String },
+      dealName: { type: String },
       dateOfTransaction: { type: String },
+      timeOfTransaction: { type: String },
       nextDueDate: { type: String },
       price: { type: Number },
       description: { type: String },
