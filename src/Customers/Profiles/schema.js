@@ -49,6 +49,14 @@ const userProfile = new Schema({
       price: { type: Number },
     },
   ],
+  reviews: [
+    {
+      companyId: { type: String },
+      serviceProviderName: { type: String },
+      rating: { type: Number },
+      comment: { type: String },
+    },
+  ],
   addressHistory: [
     {
       addressLine1: { type: String },
@@ -86,7 +94,7 @@ const userProfile = new Schema({
       dateOfTransaction: { type: String },
       nextDueDate: { type: String },
       price: { type: Number },
-      desc: { type: String },
+      description: { type: String },
     },
   ],
   wishlist: [

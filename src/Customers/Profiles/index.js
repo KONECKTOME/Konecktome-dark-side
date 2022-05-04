@@ -8,10 +8,10 @@ const { authorize } = require("../../Services/Middlewares/authorize");
 const passport = require("passport");
 require("../../Services/OAuth/googleAuth")(passport);
 require("../../Services/OAuth/FacebookAuth")(passport);
-const { crawler } = require("../../Services/Web Crawler/crawler");
 const multer = require("../../Services/Cloudinary/multer");
 const cloudinary = require("../../Services/Cloudinary/cloudinary");
 const moment = require("moment");
+const crawler = require("../../Services/Web Crawler/crawler");
 
 router.get("/", async (req, res) => {
   try {
@@ -440,6 +440,30 @@ router.post("/update-wishlist", async (req, res) => {
 
 // ----- END OF WISHLIST ------ //
 
+// ----- REVIEWS ------ //
+router.post("/update-reviews", async (req, res) => {
+  try {
+    const { userId, companyId, serviceProviderName, rating, comment } =
+      req.body;
+    let findUser = await usersModel.findById(userId);
+    if (findUser) {
+      findUser.reviews.push({
+        companyId,
+        serviceProviderName,
+        rating,
+        comment,
+      });
+      findUser = await findUser.save();
+      res.json({
+        message: "New review added for user",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// ----- END OF REVIEWS ------ //
 // ----- SPLIT BILL ------ //
 router.post("/update-family-members", async (req, res) => {
   try {
@@ -598,12 +622,49 @@ router.post("/image-upload", multer.single("image"), async (req, res) => {
 
 // ----- END IMAGE UPLOAD ------ //
 
-// router.get("/test-crawler", async (req, res) => {
-//   try {
-//     const crawl = await crawler();
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+// ----- TRANSACTION HISTORY ------ //
+router.post("/update-transaction-history", async (req, res) => {
+  try {
+    const {
+      userId,
+      companyId,
+      serviceProviderName,
+      serviceType,
+      dateOfTransaction,
+      nextDueDate,
+      price,
+      description,
+    } = req.body;
+    let findUser = await usersModel.findById(userId);
+    if (findUser) {
+      findUser.transactionHistory.push({
+        companyId,
+        serviceProviderName,
+        serviceType,
+        dateOfTransaction,
+        nextDueDate,
+        price,
+        description,
+      });
+      findUser = await findUser.save();
+      res.json({
+        message: "New transaction added for user",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+// ----- END OF TRANSACTION HISTORY ------ //
+router.get("/test-crawler", async (req, res) => {
+  try {
+    const channelData = await crawler.scrapeChannel(
+      "https://quotes.toscrape.com/"
+    );
+    console.log(channelData);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 module.exports = router;

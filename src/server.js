@@ -11,6 +11,11 @@ const listEndpoints = require("express-list-endpoints");
 const port = process.env.PORT || 3002;
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: false }));
+server.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*"); // disabled for security on local
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  next();
+});
 server.use(express.json());
 server.use(cors());
 server.use("/users", users);

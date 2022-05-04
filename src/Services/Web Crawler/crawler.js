@@ -1,43 +1,38 @@
-var request = require("request");
-var cheerio = require("cheerio");
-var fs = require("fs");
+const puppeteer = require("puppeteer");
 
-const crawler = async () => {
-  try {
-    request("https://konecktome.com/", function (error, response, body) {
-      if (error) {
-        console.log("Errorcc: " + error);
-      }
-      console.log("Status code: " + response.statusCode);
+async function scrapeChannel(url) {
+  const browser = await puppeteer.launch();
 
-      var $ = cheerio.load(body);
+  const registry = {};
+  let queue = [url];
+  while (queue.length > 0) {
+    const url = queue[queue.length - 1];
+    console.log("current url", url);
+    const page = await browser.newPage();
+    await page.goto(url);
+    registry[url] = await page.$eval("*", (el) => el.innerText);
+    queue.pop();
+    console.log("queue length", queue);
 
-      $("div.row ").each(function (index) {
-        let title = $(this).find("h3.get-notified-text-mobile").text().trim();
-        console.log(title);
-      });
+    const hrefs = await page.$$eval("a", (anchorEls) =>
+      anchorEls.map((a) => a.href)
+    );
 
-      // $("div.col1 > ul > li.grid-posts__item").each(function (index) {
-      //   var title = $(this).find("h2 > a").text().trim();
-      //   var author = $(this)
-      //     .find("div.small-meta > div:nth-child(1) > a")
-      //     .text()
-      //     .trim();
-      //   var responses = $(this)
-      //     .find("div.small-meta > div:nth-child(3) > a")
-      //     .text();
-      //   console.log(title);
-      //   console.log(author);
-      //   console.log(responses);
-      //   // fs.appendFileSync(
-      //   //   "buzzfeed.txt",
-      //   //   title + "\n" + author + "\n" + responses + "\n"
-      //   // );
-      // });
-    });
-  } catch (error) {
-    console.log(error);
+    const filteredHrefs = hrefs.filter(
+      (href) => href.startsWith(url) && registry[href] === undefined
+    );
+    const uniqueHrefs = [...new Set(filteredHrefs)];
+    queue.push(...uniqueHrefs);
+    queue = [...new Set(queue)];
+
+    await page.close();
   }
-};
 
-module.exports = { crawler };
+  browser.close();
+
+  return registry;
+}
+
+module.exports = {
+  scrapeChannel,
+};
