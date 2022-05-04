@@ -11,7 +11,6 @@ require("../../Services/OAuth/FacebookAuth")(passport);
 const multer = require("../../Services/Cloudinary/multer");
 const cloudinary = require("../../Services/Cloudinary/cloudinary");
 const moment = require("moment");
-const crawler = require("../../Services/Web Crawler/crawler");
 
 router.get("/", async (req, res) => {
   try {
@@ -625,30 +624,18 @@ router.post("/image-upload", multer.single("image"), async (req, res) => {
 // ----- TRANSACTION HISTORY ------ //
 router.post("/update-transaction-history", async (req, res) => {
   try {
-    const {
-      userId,
-      companyId,
-      serviceProviderName,
-      serviceType,
-      dateOfTransaction,
-      nextDueDate,
-      price,
-      description,
-    } = req.body;
+    const { userId, message, date, messageStatus, title } = req.body;
     let findUser = await usersModel.findById(userId);
     if (findUser) {
-      findUser.transactionHistory.push({
-        companyId,
-        serviceProviderName,
-        serviceType,
-        dateOfTransaction,
-        nextDueDate,
-        price,
-        description,
+      findUser.notifications.push({
+        message,
+        date,
+        messageStatus,
+        title,
       });
       findUser = await findUser.save();
       res.json({
-        message: "New transaction added for user",
+        message: "New notification added for user",
       });
     }
   } catch (error) {
@@ -656,6 +643,8 @@ router.post("/update-transaction-history", async (req, res) => {
   }
 });
 // ----- END OF TRANSACTION HISTORY ------ //
+
+// ----- NOTIFICATION ------ //
 router.get("/test-crawler", async (req, res) => {
   try {
     const { url } = req.body;
@@ -665,5 +654,7 @@ router.get("/test-crawler", async (req, res) => {
     console.log(error);
   }
 });
+
+// ----- END OF NOTIFICATION ------ //
 
 module.exports = router;

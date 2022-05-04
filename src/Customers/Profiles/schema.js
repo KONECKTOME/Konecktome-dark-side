@@ -106,6 +106,14 @@ const userProfile = new Schema({
       description: { type: String },
     },
   ],
+  notifications: [
+    {
+      message: { type: String },
+      date: { type: String },
+      messageStatus: { type: Boolean },
+      title: { type: Number },
+    },
+  ],
 });
 
 userProfile.statics.findByCredentials = async (email, password) => {

@@ -7,15 +7,14 @@ async function scrapeChannel(website) {
   let queue = [website];
   while (queue.length > 0) {
     const url = queue[queue.length - 1];
-    console.log(url);
     const page = await browser.newPage();
     await page.goto(url);
     registry[url] = await page.$eval("*", (el) => el.innerText);
     queue.pop();
 
-    // const hrefs = await page.$$eval("a", (anchorEls) =>
-    //   anchorEls.map((a) => a.innerText)
-    // );
+    const hrefs = await page.$$eval("a", (anchorEls) =>
+      anchorEls.map((a) => a.innerText)
+    );
 
     const titleWithClassName = await page.$$eval(
       "div.content-wrapper",
