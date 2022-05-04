@@ -5,6 +5,7 @@ const mailList = require("./mailing-list/index");
 const report = require("./Reports/index");
 const users = require("./Customers/Profiles/index");
 const crawler = require("./Amenities/crawlerRoutes");
+const companies = require("./Business/Company Profile/index");
 const cors = require("cors");
 const server = express();
 const listEndpoints = require("express-list-endpoints");
@@ -20,6 +21,7 @@ server.use(function (req, res, next) {
 server.use(express.json());
 server.use(cors());
 server.use("/users", users);
+server.use("/companies", companies);
 server.use("/crawler", crawler);
 server.use("/mail", mailList);
 server.use("/reporting", report);
