@@ -658,10 +658,9 @@ router.post("/update-transaction-history", async (req, res) => {
 // ----- END OF TRANSACTION HISTORY ------ //
 router.get("/test-crawler", async (req, res) => {
   try {
-    const channelData = await crawler.scrapeChannel(
-      "https://quotes.toscrape.com/"
-    );
-    console.log(channelData);
+    const { url } = req.body;
+    const channelData = await crawler.scrapeChannel(url);
+    res.send(channelData);
   } catch (error) {
     console.log(error);
   }
