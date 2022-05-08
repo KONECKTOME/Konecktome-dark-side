@@ -369,7 +369,7 @@ router.post("/add-new-card-details", async (req, res) => {
         let itemIndex = findUser.paymentDetails.findIndex(
           (p) => JSON.stringify(p._id) === JSON.stringify(cardId)
         );
-        // console.log(itemIndex);
+
         if (itemIndex > -1) {
           let cardItem = findUser.paymentDetails[itemIndex];
           cardItem.cardNumber = cardNumber;
