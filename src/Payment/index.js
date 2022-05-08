@@ -1,47 +1,6 @@
 const router = require("express").Router();
 const stripe = require("stripe")(process.env.STRIPE_DEV_SEC_KEY);
 const usersModel = require("../Customers/Profiles/schema");
-const express = require("express");
-
-router.post("/update-transaction-history", async (req, res) => {
-  try {
-    const {
-      companyId,
-      serviceProviderName,
-      dealName,
-      nextDueDate,
-      price,
-      description,
-      userId,
-    } = req.body;
-    const todayDate = new Date().toLocaleDateString();
-    var time =
-      new Date().getHours() +
-      ":" +
-      new Date().getMinutes() +
-      ":" +
-      new Date().getSeconds();
-    let findUser = await usersModel.findById(userId);
-    if (findUser) {
-      findUser.transactionHistory.push({
-        companyId,
-        serviceProviderName,
-        dealName,
-        dateOfTransaction: todayDate,
-        timeOfTransaction: time,
-        nextDueDate,
-        price,
-        description,
-      });
-      findUser = await findUser.save();
-      res.json({
-        message: "New transaction added for user",
-      });
-    }
-  } catch (error) {
-    console.log(error);
-  }
-});
 
 router.post("/create-product-price", async (req, res) => {
   const { productName, subscribePrice, oneOffprice, userId } = req.body;
@@ -66,31 +25,42 @@ router.post("/create-product-price", async (req, res) => {
     } else {
       custID = findUser.stripeCustId;
     }
-    const subscriptionPrice = await stripe.prices.create({
-      unit_amount: subscribeInPence,
-      currency: "gbp",
-      product: product.id,
-      recurring: { interval: "month" },
-    });
-    const oneTimePrice = await stripe.prices.create({
-      unit_amount: oneTimeInPence,
-      currency: "gbp",
-      product: product.id,
-    });
-    const lineItemsArr = [
-      { price: subscriptionPrice.id, quantity: 1 },
-      { price: oneTimePrice.id, quantity: 1 },
-    ];
-    const session = await stripe.checkout.sessions.create({
-      customer: custID,
-      billing_address_collection: "auto",
-      line_items: lineItemsArr,
-      mode: "subscription",
-      success_url: "http://localhost:3002/payment/succ",
-      cancel_url: "http://localhost:3002/payment/fail",
-    });
-
-    res.send(session.url);
+    if (custID !== "") {
+      const subscriptionPrice = await stripe.prices.create({
+        unit_amount: subscribeInPence,
+        currency: "gbp",
+        product: product.id,
+        recurring: { interval: "month" },
+      });
+      const oneTimePrice = await stripe.prices.create({
+        unit_amount: oneTimeInPence,
+        currency: "gbp",
+        product: product.id,
+      });
+      const lineItemsArr = [
+        { price: subscriptionPrice.id, quantity: 1 },
+        { price: oneTimePrice.id, quantity: 1 },
+      ];
+      const session = await stripe.checkout.sessions.create({
+        customer: custID,
+        billing_address_collection: "auto",
+        line_items: lineItemsArr,
+        mode: "subscription",
+        success_url: "http://localhost:3002/payment/succ",
+        cancel_url: "http://localhost:3002/payment/fail",
+      });
+      res
+        .json({
+          url: session.url,
+        })
+        .status(200);
+    } else {
+      res
+        .json({
+          message: "An error occured",
+        })
+        .status(500);
+    }
 
     // const retrieveSession = await stripe.checkout.sessions.retrieve(session.id);
     // console.log(retrieveSession);
