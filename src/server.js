@@ -31,7 +31,7 @@ server.use("/mail", mailList);
 server.use("/reporting", report);
 // console.log("endpoints", listEndpoints(server));
 
-// var token = require("crypto").randomBytes(48).toString("hex");
+// var token = require("crypto").randomBytes(10).toString("hex");
 // console.log(token);
 
 mongoose

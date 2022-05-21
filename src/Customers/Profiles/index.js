@@ -12,6 +12,7 @@ const multer = require("../../Services/Cloudinary/multer");
 const cloudinary = require("../../Services/Cloudinary/cloudinary");
 const moment = require("moment");
 const validator = require("../../Services/Validators/validator");
+const bcrypt = require("bcryptjs");
 
 router.get("/", async (req, res) => {
   try {
@@ -59,6 +60,47 @@ router.post("/login", async (req, res) => {
     if (user) {
       res.setHeader("Content-Type", "application/json");
       res.send(tokens);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await usersModel.findOne({ email });
+    if (user) {
+      var token = require("crypto").randomBytes(10).toString("hex");
+      const addToken = await usersModel.findOneAndUpdate(
+        { _id: user._id },
+        { changePasswordToken: token }
+      );
+      res.send(addToken);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/validate-forgot-password-token", async (req, res) => {
+  try {
+    const { changePasswordToken, newPassword } = req.body;
+    const user = await usersModel.findOne({ changePasswordToken });
+    if (user) {
+      password = await bcrypt.hash(newPassword, 8);
+      const resetPassword = await usersModel.findOneAndUpdate(
+        { _id: user._id },
+        { password }
+      );
+      if (resetPassword) {
+        const removePasswordToken = await usersModel.findOneAndUpdate(
+          { _id: user._id },
+          { changePasswordToken: "" }
+        );
+        res.json({
+          message: "Reset successful",
+        });
+      }
     }
   } catch (error) {
     console.log(error);

@@ -9,9 +9,10 @@ const userProfile = new Schema({
   },
   password: {
     type: String,
-    // required: true,
+    required: true,
     minlength: 7,
   },
+  changePasswordToken: { type: String },
   stripeCustId: { type: String },
   phone: { type: Number },
   profession: { type: String },
