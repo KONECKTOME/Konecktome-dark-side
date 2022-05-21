@@ -3,15 +3,15 @@ const passport = require("passport");
 
 const userProfile = require("../../Customers/Profiles/schema");
 
-//   const extractProfile = async (req, res, profile) => {
-//     try {
-//       res.send(profile);
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   };
+const extractProfile = async (req, res, profile, next) => {
+  try {
+    res.send(profile);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-module.exports = async (passport) => {
+module.exports = async (passport, res, req) => {
   try {
     passport.use(
       new GoogleStrategy(
@@ -20,12 +20,12 @@ module.exports = async (passport) => {
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
           callbackURL: "http://localhost:3002/users/auth/google/callback",
         },
-        async (accessToken, refreshToken, profile, cb) => {
+        async (request, accessToken, refreshToken, profile, done) => {
           const user = await userProfile.find({
             email: profile.emails[0].value,
           });
           if (user.length !== 0) {
-            return cb(null, extractProfile(user));
+            return done(null, { userId: user[0]._id });
           } else {
             const newUser = await userProfile.create({
               firstName: profile.name.givenName,
@@ -33,14 +33,14 @@ module.exports = async (passport) => {
               email: profile.emails[0].value,
               imageUrl: profile.photos[0].value,
             });
-            return cb(null, newUser);
+            return done(null, { userId: newUser._id });
           }
         }
       )
     );
 
     passport.serializeUser((user, done) => {
-      done(null, user);
+      return done(null, user);
     });
 
     passport.deserializeUser(function (user, done) {

@@ -13,11 +13,12 @@ module.exports = async (passport) => {
         },
         async (accessToken, refreshToken, profile, cb) => {
           console.log(profile);
+          cb(null, profile);
           const user = await userProfile.find({
             facebookId: profile.id,
           });
           if (user.length !== 0) {
-            return user;
+            return done(null, { userId: user[0]._id });
           } else {
             const newUser = await userProfile.create({
               firstName: profile.name.givenName,
@@ -25,7 +26,7 @@ module.exports = async (passport) => {
               gender: profile.gender,
               facebookId: profile.id,
             });
-            return newUser;
+            return done(null, { userId: newUser._id });
           }
         }
       )

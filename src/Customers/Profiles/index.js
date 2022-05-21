@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const usersModel = require("./schema");
+
 const {
   refreshToken,
   generateToken,
@@ -595,24 +596,35 @@ router.post("/update-family-members", async (req, res) => {
 
 // ----- OAUTHS ------ //
 
+// router.get(
+//   "/auth/google",
+//   passport.authenticate("google", { scope: ["email", "profile"] }),
+//   (res, req)
+// );
+
 router.get(
   "/auth/google",
-  passport.authenticate("google", { scope: ["email", "profile"] })
+  passport.authenticate("google", { scope: ["email", "profile"] }),
+  (req, res) => {}
 );
 
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "/fail",
+    failureRedirect: "/users/fail",
   }),
-  (req, res) => {
-    res.redirect("/users/success");
+  (req, res, next) => {
+    try {
+      console.log("route", req.user.userId);
+      res.redirect("/users/success");
+      res.end();
+    } catch (e) {
+      console.log(e);
+    }
   }
 );
 
-router.get("/success", (req, res) => {
-  console.log(extractProfile);
-});
+router.get("/success", (req, res) => {});
 router.get("/fail", (req, res) => {
   res.send("fail");
 });
