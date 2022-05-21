@@ -43,7 +43,9 @@ router.post("/sign-up", async (req, res) => {
           email,
           password,
         });
-        res.status(201).send(newUser._id);
+        res.status(201).json({
+          id: newUser._id,
+        });
       }
     }
   } catch (error) {
@@ -55,7 +57,6 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await usersModel.findByCredentials(email, password);
-
     const tokens = await generateToken(user);
     if (user) {
       res.setHeader("Content-Type", "application/json");
@@ -75,7 +76,9 @@ router.post("/forgot-password", async (req, res) => {
         { _id: user._id },
         { changePasswordToken: token }
       );
-      res.send(addToken);
+      res.json({
+        message: "Token generated",
+      });
     }
   } catch (error) {
     console.log(error);
