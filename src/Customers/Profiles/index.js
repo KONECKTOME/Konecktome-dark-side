@@ -615,8 +615,7 @@ router.get(
   }),
   (req, res, next) => {
     try {
-      console.log("route", req.user.userId);
-      res.redirect("/users/success");
+      res.redirect(`http://localhost:50391/dashboard/${req.user.userId}`);
       res.end();
     } catch (e) {
       console.log(e);
@@ -624,7 +623,9 @@ router.get(
   }
 );
 
-router.get("/success", (req, res) => {});
+// router.get("/success", (req, res) => {
+//   res.redirect(`http://localhost:50391/dashboard/${req.user.userId}`);
+// });
 router.get("/fail", (req, res) => {
   res.send("fail");
 });
