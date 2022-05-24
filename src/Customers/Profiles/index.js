@@ -615,7 +615,7 @@ router.get(
   }),
   (req, res, next) => {
     try {
-      res.redirect(`http://localhost:50391/dashboard/${req.user.userId}`);
+      res.redirect(`http://localhost:3000/dashboard/${req.user.userId}`);
       res.end();
     } catch (e) {
       console.log(e);
@@ -660,7 +660,7 @@ router.get("/facebook-success", async (req, res) => {
 
 // ----- END OF OAUTHS ------ //
 
-// ----- IMAGE UPLOAD ------ //
+// ----- IMAGE UPLOAD ------ //p
 
 router.post("/image-upload", multer.single("image"), async (req, res) => {
   try {
