@@ -23,6 +23,15 @@ router.get("/", async (req, res) => {
     console.log(error);
   }
 });
+
+router.get("/get-user-by-id/:userId", async (req, res) => {
+  try {
+    const allUsers = await usersModel.findById(req.params.userId);
+    res.send(allUsers).status(200);
+  } catch (error) {
+    console.log(error);
+  }
+});
 // -----  LOGIN AND SIGN UP ------ //
 router.post("/sign-up", async (req, res) => {
   try {
@@ -113,6 +122,8 @@ router.post("/validate-forgot-password-token", async (req, res) => {
 
 router.get("/get-user-after-login", authorize, async (req, res, next) => {
   try {
+    console.log(req);
+    console.log(res);
   } catch (error) {
     console.log(error);
   }

@@ -18,6 +18,9 @@ router.post("/add-new-company", async (req, res) => {
     addressLine2,
     postCode,
     phoneNumber,
+    companyLogo,
+    companyWebsite,
+    trustPilotRating,
     email,
   } = req.body;
   const company = await companyModel.find({ companyName: companyName });
@@ -29,6 +32,9 @@ router.post("/add-new-company", async (req, res) => {
     const newCompany = await companyModel.create({
       companyName,
       companyDescription,
+      companyLogo,
+      companyWebsite,
+      trustPilotRating,
       companyContactDetails: [
         {
           addressLine1,
@@ -111,6 +117,7 @@ router.post("/add-company-deals", async (req, res) => {
   let company = await companyModel.findById(companyId);
   if (company) {
     company.deals.push({
+      companyName: company.companyName,
       dealName,
       dealPrice,
       speed,
@@ -131,6 +138,18 @@ router.post("/add-company-deals", async (req, res) => {
     res.status(404).json({
       message: "Company not found",
     });
+  }
+});
+
+router.get("/get-deal-by-id", async (req, res) => {
+  try {
+    const { id } = req.body;
+    const allCompanies = await companyModel.find();
+    const deal = allCompanies[0].deals.findIndex((d) => d._id === id);
+    console.log(allCompanies[0].deals);
+    console.log(deal);
+  } catch (e) {
+    console.log(e);
   }
 });
 
