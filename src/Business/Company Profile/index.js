@@ -141,13 +141,34 @@ router.post("/add-company-deals", async (req, res) => {
   }
 });
 
-router.get("/get-deal-by-id", async (req, res) => {
+router.get("/all-deals", async (req, res) => {
   try {
-    const { id } = req.body;
+    let deals = [];
     const allCompanies = await companyModel.find();
-    const deal = allCompanies[0].deals.findIndex((d) => d._id === id);
-    console.log(allCompanies[0].deals);
-    console.log(deal);
+    allCompanies.map((deal) => {
+      return deals.push(...deal.deals);
+    });
+    res.send(deals);
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+router.get("/get-deal-by-id/:dealId", async (req, res) => {
+  try {
+    let deals = [];
+    const allCompanies = await companyModel.find();
+    allCompanies.map((deal) => {
+      return deals.push(...deal.deals);
+    });
+    console.log(deals);
+    const singleDeal = deals.filter(
+      (d) => JSON.stringify(d._id) === JSON.stringify(req.params.dealId)
+    );
+    res.json({
+      message: singleDeal,
+    });
+    console.log(singleDeal);
   } catch (e) {
     console.log(e);
   }
