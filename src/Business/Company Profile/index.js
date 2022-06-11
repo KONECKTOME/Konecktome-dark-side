@@ -161,14 +161,12 @@ router.get("/get-deal-by-id/:dealId", async (req, res) => {
     allCompanies.map((deal) => {
       return deals.push(...deal.deals);
     });
-    console.log(deals);
     const singleDeal = deals.filter(
       (d) => JSON.stringify(d._id) === JSON.stringify(req.params.dealId)
     );
     res.json({
       message: singleDeal,
     });
-    console.log(singleDeal);
   } catch (e) {
     console.log(e);
   }

@@ -370,10 +370,12 @@ router.post("/update-accounts", async (req, res) => {
       userId,
       serviceProviderName,
       companyId,
-      serviceType,
+      tag,
       joinDate,
+      companyImage,
       price,
       description,
+      dealName,
     } = req.body;
     let findUser = await usersModel.findById(userId);
     if (findUser) {
@@ -383,16 +385,20 @@ router.post("/update-accounts", async (req, res) => {
       if (itemIndex > -1) {
         let accountItem = findUser.accounts[itemIndex];
         if (accountItem.companyId === companyId) {
+          accountItem.companyImage = companyImage;
+          accountItem.dealName = dealName;
           accountItem.serviceProviderName = serviceProviderName;
-          accountItem.serviceType = serviceType;
+          accountItem.tag = tag;
           accountItem.joinDate = joinDate;
           accountItem.description = description;
           accountItem.price = price;
         } else {
           findUser.accounts.push({
             companyId,
+            companyImage,
+            dealName,
             serviceProviderName,
-            serviceType,
+            tag,
             joinDate,
             description,
             price,
@@ -477,6 +483,9 @@ router.post("/update-wishlist", async (req, res) => {
     const {
       userId,
       companyId,
+      dealId,
+      companyImage,
+      dealName,
       serviceProviderName,
       serviceType,
       price,
@@ -486,6 +495,9 @@ router.post("/update-wishlist", async (req, res) => {
     if (findUser) {
       findUser.wishlist.push({
         companyId,
+        dealId,
+        companyImage,
+        dealName,
         serviceProviderName,
         serviceType,
         price,
@@ -673,27 +685,36 @@ router.get("/facebook-success", async (req, res) => {
 
 // ----- IMAGE UPLOAD ------ //p
 
-router.post("/image-upload", multer.single("image"), async (req, res) => {
-  try {
-    const { userId } = req.body;
-    const result = await cloudinary.uploads(req.file.path);
-    if (result) {
-      const updateImage = await usersModel.findByIdAndUpdate(
-        { _id: userId },
-        { imageUrl: result.url }
-      );
-      res.json({
-        message: "Image added successfully",
-      });
-    } else {
-      res.json({
-        message: "An error occured while uploading image",
-      });
+router.post(
+  "/image-upload/:userId",
+  multer.single("image"),
+  async (req, res) => {
+    try {
+      const result = await cloudinary.uploads(req.file.path);
+      if (result) {
+        const updateImage = await usersModel.findByIdAndUpdate(
+          { _id: req.params.userId },
+          { imageUrl: result.url }
+        );
+        if (updateImage) {
+          res.json({
+            message: "Image added successfully",
+          });
+        } else {
+          res.json({
+            message: "An error occured while uploading image",
+          });
+        }
+      } else {
+        res.json({
+          message: "An error occured while uploading image",
+        });
+      }
+    } catch (error) {
+      console.log(error);
     }
-  } catch (error) {
-    console.log(error);
   }
-});
+);
 
 // ----- END IMAGE UPLOAD ------ //
 

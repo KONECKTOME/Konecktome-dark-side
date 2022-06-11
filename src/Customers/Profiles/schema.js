@@ -44,8 +44,10 @@ const userProfile = new Schema({
   accounts: [
     {
       companyId: { type: String },
+      companyImage: { type: String },
+      dealName: { type: String },
       serviceProviderName: { type: String },
-      serviceType: { type: String },
+      tag: { type: String },
       joinDate: { type: String },
       description: { type: String },
       price: { type: Number },
@@ -104,6 +106,9 @@ const userProfile = new Schema({
   wishlist: [
     {
       companyId: { type: String },
+      dealId: { type: String },
+      companyImage: { type: String },
+      dealName: { type: String },
       serviceProviderName: { type: String },
       serviceType: { type: String },
       price: { type: Number },
