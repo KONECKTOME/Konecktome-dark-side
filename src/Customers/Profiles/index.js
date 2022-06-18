@@ -185,8 +185,12 @@ router.post("/update-address", async (req, res) => {
   try {
     let {
       userId,
+      addressId,
+      buildingName,
       addressLine1,
       addressLine2,
+      town,
+      city,
       currentAddress,
       postCode,
       dateOfArrival,
@@ -194,13 +198,87 @@ router.post("/update-address", async (req, res) => {
     } = req.body;
     let findUser = await usersModel.findById(userId);
     if (findUser) {
-      let itemIndex = findUser.addressHistory.findIndex(
-        (p) => p.addressLine1 === addressLine1
+      const item = findUser.addressHistory.filter(
+        (ele) => JSON.stringify(ele._id) === JSON.stringify(addressId)
       );
-      if (itemIndex > -1) {
-        res.json({
-          message: "Address already exists",
+      if (item.length != 0) {
+        let itemIndex = findUser.addressHistory.findIndex(
+          (p) => JSON.stringify(p._id) === JSON.stringify(addressId)
+        );
+        let addressItem = findUser.addressHistory[itemIndex];
+        let allExistingDurationInMonths = "";
+        let durationOfStay = "";
+        let dateOfArrivalInArray = [];
+        let dateOfDepartureInArray = [];
+        let dateOfArrivalInString = dateOfArrival.split("-");
+        let dateOfDepartureInString = dateOfDeparture.split("-");
+        dateOfArrivalInString.reverse().forEach((str) => {
+          dateOfArrivalInArray.push(Number(str));
         });
+        dateOfDepartureInString.reverse().forEach((str) => {
+          dateOfDepartureInArray.push(Number(str));
+        });
+        let differenceInDates = moment(dateOfDepartureInArray).diff(
+          moment(dateOfArrivalInArray),
+          "months"
+        );
+        if (differenceInDates > 12) {
+          let numberOfYears = differenceInDates / 12;
+          let numberOfYearsSplit = numberOfYears.toString().split(".")[0];
+          let numberOfMonths =
+            Number(numberOfYears.toString().split(".")[1].split("")[0]) + 1;
+          durationOfStay =
+            numberOfYearsSplit +
+            " " +
+            "year(s)" +
+            " " +
+            numberOfMonths +
+            " " +
+            "month(s)";
+        } else {
+          durationOfStay = differenceInDates + " " + "month(s)";
+        }
+        if (Number(differenceInDates) > 36) {
+          await usersModel.findOneAndUpdate(
+            { _id: userId },
+            {
+              meets3yearMargin: true,
+            }
+          );
+          addressItem.buildingName = buildingName;
+          addressItem.addressLine1 = buildiaddressLine1ngName;
+          addressItem.addressLine2 = addressLine2;
+          addressItem.town = town;
+          addressItem.city = city;
+          addressItem.postCode = postCode;
+          addressItem.currentAddress = currentAddress;
+          addressItem.dateOfArrival = dateOfArrival;
+          addressItem.dateOfDeparture = dateOfDeparture;
+          addressItem.durationOfStay = durationOfStay;
+          (addressItem.durationOfStayInMonths = differenceInDates),
+            (findUser.addressHistory[itemIndex] = addressItem);
+
+          res.json({
+            message: "Address details updated",
+          });
+        } else {
+          addressItem.buildingName = buildingName;
+          addressItem.addressLine1 = addressLine1;
+          addressItem.addressLine2 = addressLine2;
+          addressItem.town = town;
+          addressItem.city = city;
+          addressItem.postCode = postCode;
+          addressItem.currentAddress = currentAddress;
+          addressItem.dateOfArrival = dateOfArrival;
+          addressItem.dateOfDeparture = dateOfDeparture;
+          addressItem.durationOfStay = durationOfStay;
+          (addressItem.durationOfStayInMonths = differenceInDates),
+            (findUser.addressHistory[itemIndex] = addressItem);
+          res.json({
+            message: "Address details updated",
+          });
+        }
+        findUser = await findUser.save();
       } else {
         let allExistingDurationInMonths = "";
         if (findUser.addressHistory.length === 0) {
@@ -244,8 +322,11 @@ router.post("/update-address", async (req, res) => {
               }
             );
             findUser.addressHistory.push({
+              buildingName,
               addressLine1,
               addressLine2,
+              town,
+              city,
               postCode,
               currentAddress,
               dateOfArrival,
@@ -255,12 +336,15 @@ router.post("/update-address", async (req, res) => {
             });
             findUser = await findUser.save();
             res.json({
-              message: "Address added ",
+              message: "Address added",
             });
           } else {
             findUser.addressHistory.push({
+              buildingName,
               addressLine1,
               addressLine2,
+              town,
+              city,
               postCode,
               currentAddress,
               dateOfArrival,
@@ -270,7 +354,7 @@ router.post("/update-address", async (req, res) => {
             });
             findUser = await findUser.save();
             res.json({
-              message: "Address added ",
+              message: "Address added",
             });
           }
         } else {
@@ -320,8 +404,11 @@ router.post("/update-address", async (req, res) => {
               }
             );
             findUser.addressHistory.push({
+              buildingName,
               addressLine1,
               addressLine2,
+              town,
+              city,
               postCode,
               currentAddress,
               dateOfArrival,
@@ -331,12 +418,15 @@ router.post("/update-address", async (req, res) => {
             });
             findUser = await findUser.save();
             res.json({
-              message: "Address added ",
+              message: "Address added",
             });
           } else {
             findUser.addressHistory.push({
+              buildingName,
               addressLine1,
               addressLine2,
+              town,
+              city,
               postCode,
               currentAddress,
               dateOfArrival,

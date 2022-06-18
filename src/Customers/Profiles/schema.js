@@ -63,8 +63,11 @@ const userProfile = new Schema({
   ],
   addressHistory: [
     {
+      buildingName: { type: String },
       addressLine1: { type: String },
       addressLine2: { type: String },
+      town: { type: String },
+      city: { type: String },
       postCode: { type: String },
       currentAddress: { type: Boolean },
       dateOfArrival: { type: String },
