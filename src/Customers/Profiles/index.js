@@ -36,6 +36,7 @@ router.get("/get-user-by-id/:userId", async (req, res) => {
 router.put("/edit-user", async (req, res) => {
   try {
     const { userId, firstName, lastName, email } = req.body;
+
     let findUser = await usersModel.findById(userId);
     if (findUser) {
       if (validator.isValidEmail(email) === false) {
@@ -49,8 +50,13 @@ router.put("/edit-user", async (req, res) => {
             firstName,
             lastName,
             email,
-          }
+          },
+          {
+            returnNewDocument: true,
+          },
+          function (err, result) {}
         );
+        updateUser = await updateUser.save();
         if (updateUser) {
           res.json({
             message: "User updated",
@@ -167,10 +173,11 @@ router.get("/get-user-after-login", authorize, async (req, res, next) => {
 
 // ----- DOB, PROFESSION, AGE, PHONE, GENDER ------ //
 
-router.post("/update-dob-profession", async (req, res) => {
+router.put("/update-dob-profession", async (req, res) => {
   try {
     const { userId, dob, profession, phone, gender } = req.body;
-    let dateOfBirth = dob.split("-").reverse();
+    console.log("client", dob);
+    let dateOfBirth = dob.split("-");
     let dateOfBirthInArray = [];
     let currDateInArr = [];
     dateOfBirth.forEach((str) => {
