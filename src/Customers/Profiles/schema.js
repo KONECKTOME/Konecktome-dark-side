@@ -15,6 +15,7 @@ const userProfile = new Schema({
   changePasswordToken: { type: String },
   stripeCustId: { type: String },
   phone: { type: Number },
+  pin: { type: Number },
   profession: { type: String },
   dob: { type: String },
   age: { type: Number },
@@ -142,6 +143,9 @@ userProfile.pre("save", async function (next) {
   const user = this;
   if (user.isModified("password")) {
     user.password = await bcrypt.hash(user.password, 8);
+  }
+  if (user.isModified("pin")) {
+    user.pin = await bcrypt.hash(user.pin, 8);
   }
   next();
 });

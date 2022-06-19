@@ -32,10 +32,43 @@ router.get("/get-user-by-id/:userId", async (req, res) => {
     console.log(error);
   }
 });
-// -----  LOGIN AND SIGN UP ------ //
+// -----  LOGIN,SIGN UP, EDIT USER DETAILS ------ //
+router.put("/edit-user", async (req, res) => {
+  try {
+    const { userId, firstName, lastName, email } = req.body;
+    let findUser = await usersModel.findById(userId);
+    if (findUser) {
+      if (validator.isValidEmail(email) === false) {
+        res.json({
+          message: "Invalid email",
+        });
+      } else {
+        let updateUser = await usersModel.findOneAndUpdate(
+          { _id: userId },
+          {
+            firstName,
+            lastName,
+            email,
+          }
+        );
+        if (updateUser) {
+          res.json({
+            message: "User updated",
+          });
+        } else {
+          res.json({
+            message: "Error",
+          });
+        }
+      }
+    }
+  } catch (e) {
+    console.log(e);
+  }
+});
 router.post("/sign-up", async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { userId, firstName, lastName, email, password, pin } = req.body;
     if (validator.isValidEmail(email) === false) {
       res.json({
         message: "Invalid email",
@@ -52,6 +85,7 @@ router.post("/sign-up", async (req, res) => {
           lastName,
           email,
           password,
+          pin,
         });
         res.status(201).json({
           id: newUser._id,
@@ -156,7 +190,6 @@ router.post("/update-dob-profession", async (req, res) => {
     let findUser = await usersModel.findOneAndUpdate(
       { _id: userId },
       {
-        userId,
         dob,
         profession,
         phone,
