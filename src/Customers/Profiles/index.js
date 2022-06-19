@@ -176,7 +176,6 @@ router.get("/get-user-after-login", authorize, async (req, res, next) => {
 router.put("/update-dob-profession", async (req, res) => {
   try {
     const { userId, dob, profession, phone, gender } = req.body;
-    console.log("client", dob);
     let dateOfBirth = dob.split("-");
     let dateOfBirthInArray = [];
     let currDateInArr = [];
