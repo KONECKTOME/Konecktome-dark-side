@@ -116,6 +116,15 @@ router.post("/login", async (req, res) => {
     console.log(error);
   }
 });
+
+router.get("/get-user-after-login", authorize, async (req, res, next) => {
+  try {
+    console.log(req);
+    console.log(res);
+  } catch (error) {
+    console.log(error);
+  }
+});
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -160,10 +169,20 @@ router.post("/validate-forgot-password-token", async (req, res) => {
   }
 });
 
-router.get("/get-user-after-login", authorize, async (req, res, next) => {
+router.post("/change-password", async (req, res) => {
   try {
-    console.log(req);
-    console.log(res);
+    const { email, oldPassword, newPassword } = req.body;
+    const user = await usersModel.findByCredentials(email, oldPassword);
+    if (user) {
+      password = await bcrypt.hash(newPassword, 8);
+      const newPasswordUpdate = await usersModel.findOneAndUpdate(
+        { _id: user._id },
+        { password: newPasswordUpdate }
+      );
+      res.json({
+        message: "Password updated",
+      });
+    }
   } catch (error) {
     console.log(error);
   }
@@ -235,11 +254,13 @@ router.post("/update-address", async (req, res) => {
       dateOfArrival,
       dateOfDeparture,
     } = req.body;
+
     let findUser = await usersModel.findById(userId);
     if (findUser) {
       const item = findUser.addressHistory.filter(
         (ele) => JSON.stringify(ele._id) === JSON.stringify(addressId)
       );
+
       if (item.length != 0) {
         let itemIndex = findUser.addressHistory.findIndex(
           (p) => JSON.stringify(p._id) === JSON.stringify(addressId)
@@ -247,21 +268,15 @@ router.post("/update-address", async (req, res) => {
         let addressItem = findUser.addressHistory[itemIndex];
         let allExistingDurationInMonths = "";
         let durationOfStay = "";
-        let dateOfArrivalInArray = [];
-        let dateOfDepartureInArray = [];
-        let dateOfArrivalInString = dateOfArrival.split("-");
-        let dateOfDepartureInString = dateOfDeparture.split("-");
-        dateOfArrivalInString.reverse().forEach((str) => {
-          dateOfArrivalInArray.push(Number(str));
-        });
-        dateOfDepartureInString.reverse().forEach((str) => {
-          dateOfDepartureInArray.push(Number(str));
-        });
-        let differenceInDates = moment(dateOfDepartureInArray).diff(
-          moment(dateOfArrivalInArray),
+        let differenceInDates = moment(dateOfDeparture).diff(
+          moment(dateOfArrival),
           "months"
         );
-        if (differenceInDates > 12) {
+        if (differenceInDates <= 0) {
+          res.json({
+            message: "Date Of Arrival cannot be more than Date Of Departure",
+          });
+        } else if (differenceInDates > 12) {
           let numberOfYears = differenceInDates / 12;
           let numberOfYearsSplit = numberOfYears.toString().split(".")[0];
           let numberOfMonths =
@@ -285,20 +300,26 @@ router.post("/update-address", async (req, res) => {
             }
           );
           addressItem.buildingName = buildingName;
-          addressItem.addressLine1 = buildiaddressLine1ngName;
+          addressItem.addressLine1 = addressLine1;
           addressItem.addressLine2 = addressLine2;
           addressItem.town = town;
           addressItem.city = city;
           addressItem.postCode = postCode;
           addressItem.currentAddress = currentAddress;
-          addressItem.dateOfArrival = dateOfArrival;
-          addressItem.dateOfDeparture = dateOfDeparture;
+          addressItem.dateOfArrival =
+            dateOfArrival[0] + "/" + dateOfArrival[1] + "/" + dateOfArrival[2];
+          addressItem.dateOfDeparture =
+            dateOfDeparture[0] +
+            "/" +
+            dateOfDeparture[1] +
+            "/" +
+            dateOfDeparture[2];
           addressItem.durationOfStay = durationOfStay;
           (addressItem.durationOfStayInMonths = differenceInDates),
             (findUser.addressHistory[itemIndex] = addressItem);
 
           res.json({
-            message: "Address details updated",
+            message: "Address added",
           });
         } else {
           addressItem.buildingName = buildingName;
@@ -308,13 +329,19 @@ router.post("/update-address", async (req, res) => {
           addressItem.city = city;
           addressItem.postCode = postCode;
           addressItem.currentAddress = currentAddress;
-          addressItem.dateOfArrival = dateOfArrival;
-          addressItem.dateOfDeparture = dateOfDeparture;
+          addressItem.dateOfArrival =
+            dateOfArrival[0] + "/" + dateOfArrival[1] + "/" + dateOfArrival[2];
+          addressItem.dateOfDeparture =
+            dateOfDeparture[0] +
+            "/" +
+            dateOfDeparture[1] +
+            "/" +
+            dateOfDeparture[2];
           addressItem.durationOfStay = durationOfStay;
           (addressItem.durationOfStayInMonths = differenceInDates),
             (findUser.addressHistory[itemIndex] = addressItem);
           res.json({
-            message: "Address details updated",
+            message: "Address added",
           });
         }
         findUser = await findUser.save();
@@ -322,22 +349,16 @@ router.post("/update-address", async (req, res) => {
         let allExistingDurationInMonths = "";
         if (findUser.addressHistory.length === 0) {
           let durationOfStay = "";
-          let dateOfArrivalInArray = [];
-          let dateOfDepartureInArray = [];
-          let dateOfArrivalInString = dateOfArrival.split("-");
-          let dateOfDepartureInString = dateOfDeparture.split("-");
-          dateOfArrivalInString.reverse().forEach((str) => {
-            dateOfArrivalInArray.push(Number(str));
-          });
-          dateOfDepartureInString.reverse().forEach((str) => {
-            dateOfDepartureInArray.push(Number(str));
-          });
-          let differenceInDates = moment(dateOfDepartureInArray).diff(
-            moment(dateOfArrivalInArray),
+          let differenceInDates = moment(dateOfDeparture).diff(
+            moment(dateOfArrival),
             "months"
           );
 
-          if (differenceInDates > 12) {
+          if (differenceInDates <= 0) {
+            res.json({
+              message: "Date Of Arrival cannot be more than Date Of Departure",
+            });
+          } else if (differenceInDates > 12) {
             let numberOfYears = differenceInDates / 12;
             let numberOfYearsSplit = numberOfYears.toString().split(".")[0];
             let numberOfMonths =
@@ -368,8 +389,18 @@ router.post("/update-address", async (req, res) => {
               city,
               postCode,
               currentAddress,
-              dateOfArrival,
-              dateOfDeparture,
+              dateOfArrival:
+                dateOfArrival[0] +
+                "/" +
+                dateOfArrival[1] +
+                "/" +
+                dateOfArrival[2],
+              dateOfDeparture:
+                dateOfDeparture[0] +
+                "/" +
+                dateOfDeparture[1] +
+                "/" +
+                dateOfDeparture[2],
               durationOfStay,
               durationOfStayInMonths: differenceInDates,
             });
@@ -386,8 +417,18 @@ router.post("/update-address", async (req, res) => {
               city,
               postCode,
               currentAddress,
-              dateOfArrival,
-              dateOfDeparture,
+              dateOfArrival:
+                dateOfArrival[0] +
+                "/" +
+                dateOfArrival[1] +
+                "/" +
+                dateOfArrival[2],
+              dateOfDeparture:
+                dateOfDeparture[0] +
+                "/" +
+                dateOfDeparture[1] +
+                "/" +
+                dateOfDeparture[2],
               durationOfStay,
               durationOfStayInMonths: differenceInDates,
             });
@@ -401,25 +442,17 @@ router.post("/update-address", async (req, res) => {
             .map((item) => parseInt(item.durationOfStayInMonths))
             .reduce((acc, next) => acc + next);
           let durationOfStay = "";
-          let dateOfArrivalInArray = [];
-          let dateOfDepartureInArray = [];
-          let dateOfArrivalInString = dateOfArrival.split("-");
-          let dateOfDepartureInString = dateOfDeparture.split("-");
-          dateOfArrivalInString.reverse().forEach((str) => {
-            dateOfArrivalInArray.push(Number(str));
-          });
-          dateOfDepartureInString.reverse().forEach((str) => {
-            dateOfDepartureInArray.push(Number(str));
-          });
-          let differenceInDates = moment(dateOfDepartureInArray).diff(
-            moment(dateOfArrivalInArray),
+          let differenceInDates = moment(dateOfDeparture).diff(
+            moment(dateOfArrival),
             "months"
           );
           let addDurationOfStayInMonths =
             allExistingDurationInMonths + differenceInDates;
-          console.log(addDurationOfStayInMonths);
-
-          if (differenceInDates > 12) {
+          if (differenceInDates <= 0) {
+            res.json({
+              message: "Date Of Arrival cannot be more than Date Of Departure",
+            });
+          } else if (differenceInDates > 12) {
             let numberOfYears = differenceInDates / 12;
             let numberOfYearsSplit = numberOfYears.toString().split(".")[0];
             let numberOfMonths =
@@ -450,8 +483,18 @@ router.post("/update-address", async (req, res) => {
               city,
               postCode,
               currentAddress,
-              dateOfArrival,
-              dateOfDeparture,
+              dateOfArrival:
+                dateOfArrival[0] +
+                "/" +
+                dateOfArrival[1] +
+                "/" +
+                dateOfArrival[2],
+              dateOfDeparture:
+                dateOfDeparture[0] +
+                "/" +
+                dateOfDeparture[1] +
+                "/" +
+                dateOfDeparture[2],
               durationOfStay,
               durationOfStayInMonths: differenceInDates,
             });
@@ -468,14 +511,24 @@ router.post("/update-address", async (req, res) => {
               city,
               postCode,
               currentAddress,
-              dateOfArrival,
-              dateOfDeparture,
+              dateOfArrival:
+                dateOfArrival[0] +
+                "/" +
+                dateOfArrival[1] +
+                "/" +
+                dateOfArrival[2],
+              dateOfDeparture:
+                dateOfDeparture[0] +
+                "/" +
+                dateOfDeparture[1] +
+                "/" +
+                dateOfDeparture[2],
               durationOfStay,
               durationOfStayInMonths: differenceInDates,
             });
             findUser = await findUser.save();
             res.json({
-              message: "Address added ",
+              message: "Address added",
             });
           }
         }
