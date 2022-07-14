@@ -15,7 +15,7 @@ const userProfile = new Schema({
   changePasswordToken: { type: String },
   stripeCustId: { type: String },
   phone: { type: Number },
-  pin: { type: Number },
+  pin: { type: String },
   profession: { type: String },
   dob: { type: String },
   age: { type: Number },
@@ -132,12 +132,17 @@ const userProfile = new Schema({
 userProfile.statics.findByCredentials = async (email, password) => {
   const user = await usersProfileModel.findOne({ email });
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    const err = new Error("Unable to login");
-    err.httpStatusCode = 401;
-    throw err;
+  if (isMatch) {
+    return user;
   }
-  return user;
+};
+
+userProfile.statics.findPinByCredentials = async (email, pin) => {
+  const user = await usersProfileModel.findOne({ email });
+  const isMatch = await bcrypt.compare(pin, user.pin);
+  if (isMatch) {
+    return user;
+  }
 };
 userProfile.pre("save", async function (next) {
   const user = this;

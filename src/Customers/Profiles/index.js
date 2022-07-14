@@ -86,6 +86,7 @@ router.post("/sign-up", async (req, res) => {
           message: "Email already exists",
         });
       } else {
+        console.log(typeof pin);
         const newUser = await usersModel.create({
           firstName,
           lastName,
@@ -117,10 +118,26 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.post("/check-pin", async (req, res) => {
+  try {
+    const { email, pin } = req.body;
+    const user = await usersModel.findPinByCredentials(email, pin);
+    if (user) {
+      res.json({
+        message: "Valid User",
+      });
+    } else if (!user) {
+      res.json({
+        message: "Invalid User",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 router.get("/get-user-after-login", authorize, async (req, res, next) => {
   try {
-    console.log(req);
-    console.log(res);
   } catch (error) {
     console.log(error);
   }

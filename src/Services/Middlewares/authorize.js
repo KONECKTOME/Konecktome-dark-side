@@ -15,10 +15,13 @@ const authorize = async (req, res, next) => {
 
       if (user) {
         // req.user = user;
-        res.send(user);
+        res.json({
+          userId: user._id,
+          message: "User Found",
+        });
         next();
       } else {
-        res.status(404).send("Check your username/password");
+        res.json({ message: "User Not Found" });
       }
     }
   } catch (e) {
