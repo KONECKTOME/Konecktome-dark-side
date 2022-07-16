@@ -692,19 +692,32 @@ router.post("/update-wishlist", async (req, res) => {
     } = req.body;
     let findUser = await usersModel.findById(userId);
     if (findUser) {
-      findUser.wishlist.push({
-        companyId,
-        dealId,
-        companyImage,
-        dealName,
-        serviceProviderName,
-        serviceType,
-        price,
-        description,
-      });
-      findUser = await findUser.save();
+      const findWishlistItem = findUser.wishlist.filter(
+        (item) => item.dealId === dealId
+      );
+      if (findWishlistItem.length !== 0) {
+        res.json({
+          message: "Item Already In Wishlist",
+        });
+      } else {
+        findUser.wishlist.push({
+          companyId,
+          dealId,
+          companyImage,
+          dealName,
+          serviceProviderName,
+          serviceType,
+          price,
+          description,
+        });
+        findUser = await findUser.save();
+        res.json({
+          message: "New wishlist added for user",
+        });
+      }
+    } else {
       res.json({
-        message: "New wishlist added for user",
+        message: "User not found",
       });
     }
   } catch (error) {
