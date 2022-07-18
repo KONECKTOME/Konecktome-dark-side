@@ -166,10 +166,9 @@ router.post("/validate-forgot-password-token", async (req, res) => {
     const { changePasswordToken, newPassword } = req.body;
     const user = await usersModel.findOne({ changePasswordToken });
     if (user) {
-      password = await bcrypt.hash(newPassword, 8);
       const resetPassword = await usersModel.findOneAndUpdate(
         { _id: user._id },
-        { password }
+        { password: newPassword }
       );
       if (resetPassword) {
         const removePasswordToken = await usersModel.findOneAndUpdate(
@@ -186,18 +185,37 @@ router.post("/validate-forgot-password-token", async (req, res) => {
   }
 });
 
+router.post("/forgot-pin", async (req, res) => {
+  const { email } = req.body;
+  const user = await usersModel.findOne({ email });
+  if (user) {
+    const randomPin = Math.floor(1000 + Math.random() * 9000);
+    const resetPin = await usersModel.findOneAndUpdate(
+      { _id: user._id },
+      { pin: randomPin }
+    );
+    res.json({
+      message: "Pin sent to email",
+    });
+  }
+});
+
 router.post("/change-password", async (req, res) => {
   try {
     const { email, oldPassword, newPassword } = req.body;
     const user = await usersModel.findByCredentials(email, oldPassword);
+
     if (user) {
-      password = await bcrypt.hash(newPassword, 8);
       const newPasswordUpdate = await usersModel.findOneAndUpdate(
         { _id: user._id },
-        { password: newPasswordUpdate }
+        { password: newPassword }
       );
       res.json({
         message: "Password updated",
+      });
+    } else {
+      res.json({
+        message: "Password Incorrect",
       });
     }
   } catch (error) {
