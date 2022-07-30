@@ -15,7 +15,7 @@ const userProfile = new Schema({
   changePasswordToken: { type: String },
   stripeCustId: { type: String },
   phone: { type: Number },
-  pin: { type: String },
+  pin: { type: String, default: "0000" },
   profession: { type: String },
   dob: { type: String },
   age: { type: Number },

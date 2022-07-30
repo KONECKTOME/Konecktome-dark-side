@@ -9,6 +9,13 @@ router.post("/create-product-price", async (req, res) => {
   try {
     const oneTimeInPence = parseInt(oneOffprice) * 100;
     const subscribeInPence = parseInt(subscribePrice) * 100;
+    const todayDate = new Date().toLocaleDateString();
+    var time =
+      new Date().getHours() +
+      ":" +
+      new Date().getMinutes() +
+      ":" +
+      new Date().getSeconds();
     let custID = "";
     let productId = "";
     let findUser = await usersModel.findById(userId);
@@ -59,11 +66,24 @@ router.post("/create-product-price", async (req, res) => {
         success_url: `http://localhost:3000/dashboard/pay-success/${userId}`,
         cancel_url: "http://localhost:3002/payment/fail",
       });
-      res
-        .json({
-          url: session.url,
-        })
-        .status(200);
+      if (session.url) {
+        findUser.transactionHistory.push({
+          companyId: "test",
+          serviceProviderName: "test",
+          dealName: productName,
+          dateOfTransaction: todayDate,
+          timeOfTransaction: time,
+          nextDueDate: "test",
+          price: subscribePrice,
+          description: "test",
+        });
+        findUser = await findUser.save();
+        res
+          .json({
+            url: session.url,
+          })
+          .status(200);
+      }
     } else {
       res
         .json({
