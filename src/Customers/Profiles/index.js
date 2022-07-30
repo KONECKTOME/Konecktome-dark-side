@@ -121,12 +121,14 @@ router.post("/login", async (req, res) => {
 router.post("/check-pin", async (req, res) => {
   try {
     const { email, pin } = req.body;
+
     const user = await usersModel.findPinByCredentials(email, pin);
     if (user) {
       res.json({
         message: "Valid User",
       });
     } else if (!user) {
+      console.log("no user");
       res.json({
         message: "Invalid User",
       });

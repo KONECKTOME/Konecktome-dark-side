@@ -1,15 +1,24 @@
 const router = require("express").Router();
 const stripe = require("stripe")(process.env.STRIPE_DEV_SEC_KEY);
 const usersModel = require("../Customers/Profiles/schema");
+const paymentModel = require("../Payment/schema");
 
 router.post("/create-product-price", async (req, res) => {
   const { productName, subscribePrice, oneOffprice, userId } = req.body;
-  const oneTimeInPence = oneOffprice * 100;
-  const subscribeInPence = subscribePrice * 100;
+
   try {
+    const oneTimeInPence = parseInt(oneOffprice) * 100;
+    const subscribeInPence = parseInt(subscribePrice) * 100;
     let custID = "";
+    let productId = "";
     let findUser = await usersModel.findById(userId);
-    const product = await stripe.products.create({ name: productName });
+    let findProduct = await paymentModel.findOne({ productName: productName });
+    if (findProduct) {
+      productId = findProduct.stripeProductId;
+    } else if (!findProduct) {
+      const product = await stripe.products.create({ name: productName });
+      productId = product.id;
+    }
     if (!findUser.stripeCustId) {
       const customer = await stripe.customers.create({
         email: findUser.email,
@@ -25,17 +34,18 @@ router.post("/create-product-price", async (req, res) => {
     } else {
       custID = findUser.stripeCustId;
     }
+
     if (custID !== "") {
       const subscriptionPrice = await stripe.prices.create({
         unit_amount: subscribeInPence,
         currency: "gbp",
-        product: product.id,
         recurring: { interval: "month" },
+        product: productId,
       });
       const oneTimePrice = await stripe.prices.create({
         unit_amount: oneTimeInPence,
         currency: "gbp",
-        product: product.id,
+        product: productId,
       });
       const lineItemsArr = [
         { price: subscriptionPrice.id, quantity: 1 },
@@ -46,7 +56,7 @@ router.post("/create-product-price", async (req, res) => {
         billing_address_collection: "auto",
         line_items: lineItemsArr,
         mode: "subscription",
-        success_url: "http://localhost:3002/payment/succ",
+        success_url: `http://localhost:3000/dashboard/pay-success/${userId}`,
         cancel_url: "http://localhost:3002/payment/fail",
       });
       res
