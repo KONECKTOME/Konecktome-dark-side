@@ -86,7 +86,6 @@ router.post("/sign-up", async (req, res) => {
           message: "Email already exists",
         });
       } else {
-        console.log(typeof pin);
         const newUser = await usersModel.create({
           firstName,
           lastName,
@@ -101,6 +100,24 @@ router.post("/sign-up", async (req, res) => {
     }
   } catch (error) {
     console.log(error);
+  }
+});
+
+router.post("/pin-for-OAuth", async (req, res) => {
+  const { email, newPin } = req.body;
+  const user = await usersModel.find({ email: email });
+  if (user) {
+    const updatePin = await usersModel.findOneAndUpdate(
+      { _id: user[0]._id },
+      { pin: newPin }
+    );
+    if (updatePin) {
+      res.json({ message: "Pin Updated" });
+    } else {
+      res.json({ message: "Error Occured" });
+    }
+  } else {
+    res.json({ message: "Invalid User" });
   }
 });
 
