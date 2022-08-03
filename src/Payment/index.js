@@ -10,12 +10,14 @@ router.post("/create-product-price", async (req, res) => {
     const oneTimeInPence = parseInt(oneOffprice) * 100;
     const subscribeInPence = parseInt(subscribePrice) * 100;
     const todayDate = new Date().toLocaleDateString();
+
     var time =
       new Date().getHours() +
       ":" +
       new Date().getMinutes() +
       ":" +
       new Date().getSeconds();
+    console.log(time);
     let custID = "";
     let productId = "";
     let findUser = await usersModel.findById(userId);

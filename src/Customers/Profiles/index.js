@@ -107,9 +107,10 @@ router.post("/pin-for-OAuth", async (req, res) => {
   const { email, newPin } = req.body;
   const user = await usersModel.find({ email: email });
   if (user) {
+    const hashedPin = await bcrypt.hash(newPin, 8);
     const updatePin = await usersModel.findOneAndUpdate(
       { _id: user[0]._id },
-      { pin: newPin }
+      { pin: hashedPin }
     );
     if (updatePin) {
       res.json({ message: "Pin Updated" });
@@ -138,14 +139,12 @@ router.post("/login", async (req, res) => {
 router.post("/check-pin", async (req, res) => {
   try {
     const { email, pin } = req.body;
-
     const user = await usersModel.findPinByCredentials(email, pin);
     if (user) {
       res.json({
         message: "Valid User",
       });
     } else if (!user) {
-      console.log("no user");
       res.json({
         message: "Invalid User",
       });
