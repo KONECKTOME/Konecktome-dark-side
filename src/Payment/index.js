@@ -4,7 +4,17 @@ const usersModel = require("../Customers/Profiles/schema");
 const paymentModel = require("../Payment/schema");
 
 router.post("/create-product-price", async (req, res) => {
-  const { productName, subscribePrice, oneOffprice, userId } = req.body;
+  const {
+    productName,
+    subscribePrice,
+    oneOffprice,
+    userId,
+    deliveryAddressLine1,
+    deliveryAddressLine2,
+    deliveryAddressTown,
+    deliveryAddressCity,
+    deliveryAddressPostCode,
+  } = req.body;
 
   try {
     const oneTimeInPence = parseInt(oneOffprice) * 100;
@@ -17,7 +27,7 @@ router.post("/create-product-price", async (req, res) => {
       new Date().getMinutes() +
       ":" +
       new Date().getSeconds();
-    console.log(time);
+
     let custID = "";
     let productId = "";
     let findUser = await usersModel.findById(userId);
@@ -66,7 +76,7 @@ router.post("/create-product-price", async (req, res) => {
         line_items: lineItemsArr,
         mode: "subscription",
         success_url: `http://localhost:3000/dashboard/pay-success/${userId}`,
-        cancel_url: "http://localhost:3002/payment/fail",
+        cancel_url: "http://localhost:3000/payment/fail",
       });
       if (session.url) {
         findUser.transactionHistory.push({
@@ -78,6 +88,15 @@ router.post("/create-product-price", async (req, res) => {
           nextDueDate: "test",
           price: subscribePrice,
           description: "test",
+          deliveryAddress: [
+            {
+              addressLine1: deliveryAddressLine1,
+              addressLine2: deliveryAddressLine2,
+              town: deliveryAddressTown,
+              city: deliveryAddressCity,
+              postCode: deliveryAddressPostCode,
+            },
+          ],
         });
         findUser = await findUser.save();
         res

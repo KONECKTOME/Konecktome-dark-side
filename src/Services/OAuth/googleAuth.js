@@ -1,6 +1,5 @@
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const passport = require("passport");
-
 const userProfile = require("../../Customers/Profiles/schema");
 
 const extractProfile = async (req, res, profile, next) => {
@@ -20,10 +19,10 @@ module.exports = async (passport, res, req) => {
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
           callbackURL: "http://localhost:3002/users/auth/google/callback",
         },
-        async (request, accessToken, refreshToken, profile, done) => {
+        async (request, accessToken, refreshToken, profile, done) => {  
           const user = await userProfile.find({
             email: profile.emails[0].value,
-          });
+          });    
           if (user.length !== 0) {
             return done(null, { userId: user[0]._id });
           } else {

@@ -6,7 +6,6 @@ const companyProfile = new Schema({
   companyDescription: { type: String, required: true },
   companyWebsite: { type: String, required: true },
   trustPilotRating: { type: Number, required: true },
-  tag: { type: Number, required: true },
   companyContactDetails: [
     {
       addressLine1: { type: String, required: true },
@@ -31,6 +30,7 @@ const companyProfile = new Schema({
       dealPrice: { type: String },
       speed: { type: String },
       subTitle: { type: String },
+      tag: { type: String, required: true },
       dealContractPlans: [
         {
           setUpFee: { type: String },

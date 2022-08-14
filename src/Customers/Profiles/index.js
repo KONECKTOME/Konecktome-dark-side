@@ -248,13 +248,13 @@ router.post("/change-password", async (req, res) => {
 router.put("/update-dob-profession", async (req, res) => {
   try {
     const { userId, dob, profession, phone, gender } = req.body;
+    console.log(dob);
     let dateOfBirth = dob.split("-");
     let dateOfBirthInArray = [];
     let currDateInArr = [];
     dateOfBirth.forEach((str) => {
       return dateOfBirthInArray.push(Number(str));
     });
-
     let currDate = new Date().toLocaleDateString().split("/").reverse();
     currDate.forEach((str) => {
       return currDateInArr.push(Number(str));
@@ -273,6 +273,7 @@ router.put("/update-dob-profession", async (req, res) => {
         phone,
         gender,
         age: parseInt(age),
+        moreInfoNeeded: false,
       }
     );
     if (findUser) {
@@ -867,12 +868,6 @@ router.post("/update-family-members", async (req, res) => {
 
 // ----- OAUTHS ------ //
 
-// router.get(
-//   "/auth/google",
-//   passport.authenticate("google", { scope: ["email", "profile"] }),
-//   (res, req)
-// );
-
 router.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["email", "profile"] }),
@@ -977,6 +972,11 @@ router.post("/update-transaction-history", async (req, res) => {
       price,
       description,
       userId,
+      deliveryAddressLine1,
+      deliveryAddressLine2,
+      deliveryAddressTown,
+      deliveryAddressCity,
+      deliveryAddressPostCode,
     } = req.body;
     const todayDate = new Date().toLocaleDateString();
     var time =
@@ -996,6 +996,15 @@ router.post("/update-transaction-history", async (req, res) => {
         nextDueDate,
         price,
         description,
+        deliveryAddress: [
+          {
+            addressLine1: deliveryAddressLine1,
+            addressLine2: deliveryAddressLine2,
+            town: deliveryAddressTown,
+            city: deliveryAddressCity,
+            postCode: deliveryAddressPostCode,
+          },
+        ],
       });
       findUser = await findUser.save();
       res.json({
