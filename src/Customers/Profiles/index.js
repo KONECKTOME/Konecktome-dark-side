@@ -126,8 +126,10 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await usersModel.findByCredentials(email, password);
-    const tokens = await generateToken(user);
-    if (user) {
+    if (!user) {
+      res.json({ newAccessToken: "Email or pass incorrect" });
+    } else if (user) {
+      const tokens = await generateToken(user);
       res.setHeader("Content-Type", "application/json");
       res.send(tokens);
     }
