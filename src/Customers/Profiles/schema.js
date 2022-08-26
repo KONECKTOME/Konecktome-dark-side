@@ -23,7 +23,7 @@ const userProfile = new Schema({
   gender: { type: String },
   facebookId: { type: Number },
   meets3yearMargin: { type: Boolean },
-  moreInfoNeeded: { type: String, default: "true" },
+  moreInfoNeeded: { type: Boolean, default: true },
   splitBillFamilyMembers: [
     {
       groupingByService: [

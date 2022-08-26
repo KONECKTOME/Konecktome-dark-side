@@ -74,7 +74,7 @@ router.put("/edit-user", async (req, res) => {
 });
 router.post("/sign-up", async (req, res) => {
   try {
-    const { userId, firstName, lastName, email, password, pin } = req.body;
+    const { firstName, lastName, email, password, pin } = req.body;
     if (validator.isValidEmail(email) === false) {
       res.json({
         message: "Invalid email",
@@ -86,9 +86,12 @@ router.post("/sign-up", async (req, res) => {
           message: "Email already exists",
         });
       } else {
+        let firstNameCap =
+          firstName.charAt(0).toUpperCase() + firstName.slice(1);
+        let lastNameCap = lastName.charAt(0).toUpperCase() + lastName.slice(1);
         const newUser = await usersModel.create({
-          firstName,
-          lastName,
+          firstNameCap,
+          lastNameCap,
           email,
           password,
           pin,
@@ -316,6 +319,7 @@ router.post("/update-address", async (req, res) => {
       const item = findUser.addressHistory.filter(
         (ele) => JSON.stringify(ele._id) === JSON.stringify(addressId)
       );
+      console.log("address id", item);
 
       if (item.length != 0) {
         let itemIndex = findUser.addressHistory.findIndex(
@@ -460,10 +464,6 @@ router.post("/update-address", async (req, res) => {
               durationOfStay,
               durationOfStayInMonths: differenceInDates,
             });
-            findUser = await findUser.save();
-            res.json({
-              message: "Address added",
-            });
           } else {
             findUser.addressHistory.push({
               buildingName,
@@ -488,11 +488,11 @@ router.post("/update-address", async (req, res) => {
               durationOfStay,
               durationOfStayInMonths: differenceInDates,
             });
-            findUser = await findUser.save();
-            res.json({
-              message: "Address added",
-            });
           }
+          findUser = await findUser.save();
+          res.json({
+            message: "Address added",
+          });
         } else {
           allExistingDurationInMonths = findUser.addressHistory
             .map((item) => parseInt(item.durationOfStayInMonths))
@@ -554,10 +554,6 @@ router.post("/update-address", async (req, res) => {
               durationOfStay,
               durationOfStayInMonths: differenceInDates,
             });
-            findUser = await findUser.save();
-            res.json({
-              message: "Address added",
-            });
           } else {
             findUser.addressHistory.push({
               buildingName,
@@ -582,13 +578,13 @@ router.post("/update-address", async (req, res) => {
               durationOfStay,
               durationOfStayInMonths: differenceInDates,
             });
-            findUser = await findUser.save();
-            res.json({
-              message: "Address added",
-            });
           }
         }
       }
+      findUser = await findUser.save();
+      res.json({
+        message: "Address added",
+      });
     } else {
       res.json({
         message: "User not found",
