@@ -14,6 +14,7 @@ router.post("/create-product-price", async (req, res) => {
     deliveryAddressTown,
     deliveryAddressCity,
     deliveryAddressPostCode,
+    installationDateAndTime,
   } = req.body;
 
   try {
@@ -79,26 +80,27 @@ router.post("/create-product-price", async (req, res) => {
         cancel_url: "http://localhost:3000/payment/fail",
       });
       if (session.url) {
-        findUser.transactionHistory.push({
-          companyId: "test",
-          serviceProviderName: "test",
-          dealName: productName,
-          dateOfTransaction: todayDate,
-          timeOfTransaction: time,
-          nextDueDate: "test",
-          price: subscribePrice,
-          description: "test",
-          deliveryAddress: [
-            {
-              addressLine1: deliveryAddressLine1,
-              addressLine2: deliveryAddressLine2,
-              town: deliveryAddressTown,
-              city: deliveryAddressCity,
-              postCode: deliveryAddressPostCode,
-            },
-          ],
-        });
-        findUser = await findUser.save();
+        // findUser.transactionHistory.push({
+        //   companyId: "test",
+        //   serviceProviderName: "test",
+        //   dealName: productName,
+        //   dateOfTransaction: todayDate,
+        //   timeOfTransaction: time,
+        //   nextDueDate: "test",
+        //   price: subscribePrice,
+        //   description: "test",
+        //   installationDateAndTime,
+        //   deliveryAddress: [
+        //     {
+        //       addressLine1: deliveryAddressLine1,
+        //       addressLine2: deliveryAddressLine2,
+        //       town: deliveryAddressTown,
+        //       city: deliveryAddressCity,
+        //       postCode: deliveryAddressPostCode,
+        //     },
+        //   ],
+        // });
+        // findUser = await findUser.save();
         res
           .json({
             url: session.url,

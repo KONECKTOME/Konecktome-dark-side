@@ -72,6 +72,7 @@ const userProfile = new Schema({
       city: { type: String },
       postCode: { type: String },
       currentAddress: { type: Boolean },
+      deliveryAddress: { type: Boolean },
       dateOfArrival: { type: String },
       dateOfDeparture: { type: String },
       durationOfStay: { type: String },
@@ -106,6 +107,7 @@ const userProfile = new Schema({
       subscriptionPrice: { type: Number },
       oneOffPrice: { type: Number },
       description: { type: String },
+      installationDateAndTime: { type: String },
       deliveryAddress: [
         {
           addressLine1: { type: String },

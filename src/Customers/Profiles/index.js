@@ -90,8 +90,8 @@ router.post("/sign-up", async (req, res) => {
           firstName.charAt(0).toUpperCase() + firstName.slice(1);
         let lastNameCap = lastName.charAt(0).toUpperCase() + lastName.slice(1);
         const newUser = await usersModel.create({
-          firstNameCap,
-          lastNameCap,
+          firstName: firstNameCap,
+          lastName: lastNameCap,
           email,
           password,
           pin,
@@ -312,16 +312,17 @@ router.post("/update-address", async (req, res) => {
       postCode,
       dateOfArrival,
       dateOfDeparture,
+      deliveryAddress,
     } = req.body;
-
     let findUser = await usersModel.findById(userId);
     if (findUser) {
       const item = findUser.addressHistory.filter(
         (ele) => JSON.stringify(ele._id) === JSON.stringify(addressId)
       );
-      console.log("address id", item);
+      console.log("address item", item);
 
       if (item.length != 0) {
+        console.log("address id here");
         let itemIndex = findUser.addressHistory.findIndex(
           (p) => JSON.stringify(p._id) === JSON.stringify(addressId)
         );
@@ -365,6 +366,7 @@ router.post("/update-address", async (req, res) => {
           addressItem.town = town;
           addressItem.city = city;
           addressItem.postCode = postCode;
+          addressItem.deliveryAddress = deliveryAddress;
           addressItem.currentAddress = currentAddress;
           addressItem.dateOfArrival =
             dateOfArrival[0] + "/" + dateOfArrival[1] + "/" + dateOfArrival[2];
@@ -377,10 +379,6 @@ router.post("/update-address", async (req, res) => {
           addressItem.durationOfStay = durationOfStay;
           (addressItem.durationOfStayInMonths = differenceInDates),
             (findUser.addressHistory[itemIndex] = addressItem);
-
-          res.json({
-            message: "Address added",
-          });
         } else {
           addressItem.buildingName = buildingName;
           addressItem.addressLine1 = addressLine1;
@@ -389,6 +387,7 @@ router.post("/update-address", async (req, res) => {
           addressItem.city = city;
           addressItem.postCode = postCode;
           addressItem.currentAddress = currentAddress;
+          addressItem.deliveryAddress = deliveryAddress;
           addressItem.dateOfArrival =
             dateOfArrival[0] + "/" + dateOfArrival[1] + "/" + dateOfArrival[2];
           addressItem.dateOfDeparture =
@@ -400,12 +399,13 @@ router.post("/update-address", async (req, res) => {
           addressItem.durationOfStay = durationOfStay;
           (addressItem.durationOfStayInMonths = differenceInDates),
             (findUser.addressHistory[itemIndex] = addressItem);
-          res.json({
-            message: "Address added",
-          });
         }
         findUser = await findUser.save();
+        res.json({
+          message: "Address updated",
+        });
       } else {
+        console.log("address id not here");
         let allExistingDurationInMonths = "";
         if (findUser.addressHistory.length === 0) {
           let durationOfStay = "";
@@ -413,7 +413,7 @@ router.post("/update-address", async (req, res) => {
             moment(dateOfArrival),
             "months"
           );
-
+          console.log("difff", differenceInDates);
           if (differenceInDates <= 0) {
             res.json({
               message: "Date Of Arrival cannot be more than Date Of Departure",
@@ -449,6 +449,7 @@ router.post("/update-address", async (req, res) => {
               city,
               postCode,
               currentAddress,
+              deliveryAddress,
               dateOfArrival:
                 dateOfArrival[0] +
                 "/" +
@@ -473,6 +474,7 @@ router.post("/update-address", async (req, res) => {
               city,
               postCode,
               currentAddress,
+              deliveryAddress,
               dateOfArrival:
                 dateOfArrival[0] +
                 "/" +
@@ -489,14 +491,11 @@ router.post("/update-address", async (req, res) => {
               durationOfStayInMonths: differenceInDates,
             });
           }
-          findUser = await findUser.save();
-          res.json({
-            message: "Address added",
-          });
         } else {
           allExistingDurationInMonths = findUser.addressHistory
             .map((item) => parseInt(item.durationOfStayInMonths))
             .reduce((acc, next) => acc + next);
+          console.log("all existing duration", allExistingDurationInMonths);
           let durationOfStay = "";
           let differenceInDates = moment(dateOfDeparture).diff(
             moment(dateOfArrival),
@@ -504,6 +503,7 @@ router.post("/update-address", async (req, res) => {
           );
           let addDurationOfStayInMonths =
             allExistingDurationInMonths + differenceInDates;
+          console.log("addDurationOfStayInMonths", addDurationOfStayInMonths);
           if (differenceInDates <= 0) {
             res.json({
               message: "Date Of Arrival cannot be more than Date Of Departure",
@@ -524,7 +524,9 @@ router.post("/update-address", async (req, res) => {
           } else {
             durationOfStay = differenceInDates + " " + "month(s)";
           }
+          console.log("durationOfStay", durationOfStay);
           if (addDurationOfStayInMonths >= 36) {
+            console.log("first if");
             await usersModel.findOneAndUpdate(
               { _id: userId },
               {
@@ -539,6 +541,7 @@ router.post("/update-address", async (req, res) => {
               city,
               postCode,
               currentAddress,
+              deliveryAddress,
               dateOfArrival:
                 dateOfArrival[0] +
                 "/" +
@@ -555,6 +558,7 @@ router.post("/update-address", async (req, res) => {
               durationOfStayInMonths: differenceInDates,
             });
           } else {
+            console.log("secoind if");
             findUser.addressHistory.push({
               buildingName,
               addressLine1,
@@ -563,6 +567,7 @@ router.post("/update-address", async (req, res) => {
               city,
               postCode,
               currentAddress,
+              deliveryAddress,
               dateOfArrival:
                 dateOfArrival[0] +
                 "/" +
@@ -580,11 +585,11 @@ router.post("/update-address", async (req, res) => {
             });
           }
         }
+        findUser = await findUser.save();
+        res.json({
+          message: "Address Added",
+        });
       }
-      findUser = await findUser.save();
-      res.json({
-        message: "Address added",
-      });
     } else {
       res.json({
         message: "User not found",
@@ -975,6 +980,7 @@ router.post("/update-transaction-history", async (req, res) => {
       deliveryAddressTown,
       deliveryAddressCity,
       deliveryAddressPostCode,
+      installationDateAndTime,
     } = req.body;
     const todayDate = new Date().toLocaleDateString();
     var time =
@@ -994,6 +1000,7 @@ router.post("/update-transaction-history", async (req, res) => {
         nextDueDate,
         price,
         description,
+        installationDateAndTime,
         deliveryAddress: [
           {
             addressLine1: deliveryAddressLine1,
