@@ -253,7 +253,7 @@ router.post("/change-password", async (req, res) => {
 router.put("/update-dob-profession", async (req, res) => {
   try {
     const { userId, dob, profession, phone, gender } = req.body;
-    console.log(dob);
+
     let dateOfBirth = dob.split("-");
     let dateOfBirthInArray = [];
     let currDateInArr = [];
@@ -270,25 +270,31 @@ router.put("/update-dob-profession", async (req, res) => {
       "months"
     );
     let age = differenceInDates / 12;
-    let findUser = await usersModel.findOneAndUpdate(
-      { _id: userId },
-      {
-        dob,
-        profession,
-        phone,
-        gender,
-        age: parseInt(age),
-        moreInfoNeeded: false,
-      }
-    );
-    if (findUser) {
+    if (age < 18) {
       res.json({
-        message: "User profession and co updated!",
+        message: "Age Cannot Be Less Than 18",
       });
     } else {
-      res.json({
-        message: "ERROR!",
-      });
+      let findUser = await usersModel.findOneAndUpdate(
+        { _id: userId },
+        {
+          dob,
+          profession,
+          phone,
+          gender,
+          age: parseInt(age),
+          moreInfoNeeded: false,
+        }
+      );
+      if (findUser) {
+        res.json({
+          message: "User profession and co updated!",
+        });
+      } else {
+        res.json({
+          message: "ERROR!",
+        });
+      }
     }
   } catch (error) {
     console.log(error);
@@ -319,10 +325,7 @@ router.post("/update-address", async (req, res) => {
       const item = findUser.addressHistory.filter(
         (ele) => JSON.stringify(ele._id) === JSON.stringify(addressId)
       );
-      console.log("address item", item);
-
       if (item.length != 0) {
-        console.log("address id here");
         let itemIndex = findUser.addressHistory.findIndex(
           (p) => JSON.stringify(p._id) === JSON.stringify(addressId)
         );
@@ -405,7 +408,6 @@ router.post("/update-address", async (req, res) => {
           message: "Address updated",
         });
       } else {
-        console.log("address id not here");
         let allExistingDurationInMonths = "";
         if (findUser.addressHistory.length === 0) {
           let durationOfStay = "";
@@ -413,7 +415,7 @@ router.post("/update-address", async (req, res) => {
             moment(dateOfArrival),
             "months"
           );
-          console.log("difff", differenceInDates);
+
           if (differenceInDates <= 0) {
             res.json({
               message: "Date Of Arrival cannot be more than Date Of Departure",
@@ -526,7 +528,6 @@ router.post("/update-address", async (req, res) => {
           }
           console.log("durationOfStay", durationOfStay);
           if (addDurationOfStayInMonths >= 36) {
-            console.log("first if");
             await usersModel.findOneAndUpdate(
               { _id: userId },
               {
@@ -558,7 +559,6 @@ router.post("/update-address", async (req, res) => {
               durationOfStayInMonths: differenceInDates,
             });
           } else {
-            console.log("secoind if");
             findUser.addressHistory.push({
               buildingName,
               addressLine1,
@@ -587,7 +587,7 @@ router.post("/update-address", async (req, res) => {
         }
         findUser = await findUser.save();
         res.json({
-          message: "Address Added",
+          message: "Address added",
         });
       }
     } else {

@@ -76,31 +76,10 @@ router.post("/create-product-price", async (req, res) => {
         billing_address_collection: "auto",
         line_items: lineItemsArr,
         mode: "subscription",
-        success_url: `http://localhost:3000/dashboard/pay-success/${userId}`,
+        success_url: `http://localhost:3000/dashboard/paysuccess/${userId}`,
         cancel_url: "http://localhost:3000/payment/fail",
       });
       if (session.url) {
-        // findUser.transactionHistory.push({
-        //   companyId: "test",
-        //   serviceProviderName: "test",
-        //   dealName: productName,
-        //   dateOfTransaction: todayDate,
-        //   timeOfTransaction: time,
-        //   nextDueDate: "test",
-        //   price: subscribePrice,
-        //   description: "test",
-        //   installationDateAndTime,
-        //   deliveryAddress: [
-        //     {
-        //       addressLine1: deliveryAddressLine1,
-        //       addressLine2: deliveryAddressLine2,
-        //       town: deliveryAddressTown,
-        //       city: deliveryAddressCity,
-        //       postCode: deliveryAddressPostCode,
-        //     },
-        //   ],
-        // });
-        // findUser = await findUser.save();
         res
           .json({
             url: session.url,
