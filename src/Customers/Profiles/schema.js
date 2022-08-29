@@ -108,6 +108,8 @@ const userProfile = new Schema({
       oneOffPrice: { type: Number },
       description: { type: String },
       installationDateAndTime: { type: String },
+      status: { type: String, default: "Pending" },
+      total: { type: Number },
       deliveryAddress: [
         {
           addressLine1: { type: String },

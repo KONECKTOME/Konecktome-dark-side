@@ -108,7 +108,7 @@ router.post("/add-company-deals", async (req, res) => {
     setUpFee,
     contractDuration,
     features,
-    tag
+    tag,
   } = req.body;
   const newFeatureArr = [];
   const featureArr = features.split(",");
