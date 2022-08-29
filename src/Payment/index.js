@@ -4,18 +4,7 @@ const usersModel = require("../Customers/Profiles/schema");
 const paymentModel = require("../Payment/schema");
 
 router.post("/create-product-price", async (req, res) => {
-  const {
-    productName,
-    subscribePrice,
-    oneOffprice,
-    userId,
-    deliveryAddressLine1,
-    deliveryAddressLine2,
-    deliveryAddressTown,
-    deliveryAddressCity,
-    deliveryAddressPostCode,
-    installationDateAndTime,
-  } = req.body;
+  const { productName, subscribePrice, oneOffprice, userId, dealId } = req.body;
 
   try {
     const oneTimeInPence = parseInt(oneOffprice) * 100;
@@ -76,7 +65,7 @@ router.post("/create-product-price", async (req, res) => {
         billing_address_collection: "auto",
         line_items: lineItemsArr,
         mode: "subscription",
-        success_url: `http://localhost:3000/dashboard/paysuccess/${userId}`,
+        success_url: `http://localhost:3000/dashboard/pay-success/${userId}/${dealId}`,
         cancel_url: "http://localhost:3000/payment/fail",
       });
       if (session.url) {

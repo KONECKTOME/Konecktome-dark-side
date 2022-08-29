@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const usersModel = require("./schema");
+const companyModel = require("../../Business/Company Profile/schema");
 
 const {
   refreshToken,
@@ -14,6 +15,9 @@ const cloudinary = require("../../Services/Cloudinary/cloudinary");
 const moment = require("moment");
 const validator = require("../../Services/Validators/validator");
 const bcrypt = require("bcryptjs");
+const {
+  default: ContactRestfulModelCollection,
+} = require("nylas/lib/models/contact-restful-model-collection");
 
 router.get("/", async (req, res) => {
   try {
@@ -968,12 +972,8 @@ router.post(
 router.post("/update-transaction-history", async (req, res) => {
   try {
     const {
-      companyId,
-      serviceProviderName,
-      dealName,
+      dealId,
       nextDueDate,
-      price,
-      description,
       userId,
       deliveryAddressLine1,
       deliveryAddressLine2,
@@ -982,39 +982,78 @@ router.post("/update-transaction-history", async (req, res) => {
       deliveryAddressPostCode,
       installationDateAndTime,
     } = req.body;
-    const todayDate = new Date().toLocaleDateString();
-    var time =
-      new Date().getHours() +
-      ":" +
-      new Date().getMinutes() +
-      ":" +
-      new Date().getSeconds();
     let findUser = await usersModel.findById(userId);
     if (findUser) {
+      let deals = [];
+      const allCompanies = await companyModel.find();
+      allCompanies.map((deal) => {
+        return deals.push(...deal.deals);
+      });
+      const singleDeal = deals.filter(
+        (d) => JSON.stringify(d._id) === JSON.stringify(dealId)
+      );
+      let company = await companyModel.findOne({
+        companyName: singleDeal[0].companyName,
+      });
+
+      const todayDate = new Date().toLocaleDateString();
+      var time =
+        new Date().getHours() +
+        ":" +
+        new Date().getMinutes() +
+        ":" +
+        new Date().getSeconds();
       findUser.transactionHistory.push({
-        companyId,
-        serviceProviderName,
-        dealName,
+        companyId: company._id,
+        serviceProviderName: company.companyName,
+        dealName: singleDeal[0].dealName,
         dateOfTransaction: todayDate,
         timeOfTransaction: time,
-        nextDueDate,
-        price,
-        description,
-        installationDateAndTime,
+        nextDueDate: "test",
+        subscriptionPrice: singleDeal[0].dealContractPlans.setUpFee,
+        oneOffPrice: singleDeal[0].dealPrice,
+        description: "test",
+        installationDateAndTime: "test",
         deliveryAddress: [
           {
-            addressLine1: deliveryAddressLine1,
-            addressLine2: deliveryAddressLine2,
-            town: deliveryAddressTown,
-            city: deliveryAddressCity,
-            postCode: deliveryAddressPostCode,
+            addressLine1: "test",
+            addressLine2: "test",
+            town: "test",
+            city: "test",
+            postCode: "test",
           },
         ],
       });
+      console.log(findUser.transactionHistory);
       findUser = await findUser.save();
       res.json({
-        message: "New transaction added for user",
+        message: {
+          serviceProviderName: company.companyName,
+          dealName: singleDeal[0].dealName,
+          dateOfTransaction: todayDate,
+          timeOfTransaction: time,
+          nextDueDate: "test",
+          subscriptionPrice: singleDeal[0].dealContractPlans[0].setUpFee,
+          oneOffPrice: singleDeal[0].dealPrice,
+          description: "test",
+          installationDateAndTime,
+          status: "Pending",
+          total:
+            parseInt(singleDeal[0].dealContractPlans[0].setUpFee) +
+            parseInt(singleDeal[0].dealPrice),
+          deliveryAddress: [
+            {
+              addressLine1: "test",
+              addressLine2: "test",
+              town: "test",
+              city: "test",
+              postCode: "test",
+            },
+          ],
+        },
       });
+    } else {
+      res.json({ message: "User Not Found" });
     }
   } catch (error) {
     console.log(error);
