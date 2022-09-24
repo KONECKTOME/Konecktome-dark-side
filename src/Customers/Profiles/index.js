@@ -257,7 +257,6 @@ router.post("/change-password", async (req, res) => {
 router.put("/update-dob-profession", async (req, res) => {
   try {
     const { userId, dob, profession, phone, gender } = req.body;
-
     let dateOfBirth = dob.split("-");
     let dateOfBirthInArray = [];
     let currDateInArr = [];

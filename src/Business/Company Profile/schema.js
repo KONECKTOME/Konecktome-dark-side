@@ -26,6 +26,7 @@ const companyProfile = new Schema({
   deals: [
     {
       companyName: { type: String },
+      companyLogo: { type: String },
       dealName: { type: String },
       dealPrice: { type: String },
       speed: { type: String },

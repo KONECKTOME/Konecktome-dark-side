@@ -109,6 +109,7 @@ router.post("/add-company-deals", async (req, res) => {
     contractDuration,
     features,
     tag,
+    companyLogo,
   } = req.body;
   const newFeatureArr = [];
   const featureArr = features.split(",");
@@ -119,6 +120,7 @@ router.post("/add-company-deals", async (req, res) => {
   if (company) {
     company.deals.push({
       companyName: company.companyName,
+      companyLogo: company.companyLogo,
       dealName,
       dealPrice,
       speed,
@@ -150,6 +152,7 @@ router.get("/all-deals", async (req, res) => {
     allCompanies.map((deal) => {
       return deals.push(...deal.deals);
     });
+    console.log(deals);
     res.send(deals);
   } catch (e) {
     console.log(e);
@@ -161,7 +164,7 @@ router.get("/get-deal-by-id/:dealId", async (req, res) => {
     let deals = [];
     const allCompanies = await companyModel.find();
     allCompanies.map((deal) => {
-      return deals.push(...deal.deals);
+      return deals.push(...deal.deals, deal.companyLogo);
     });
     const singleDeal = deals.filter(
       (d) => JSON.stringify(d._id) === JSON.stringify(req.params.dealId)
