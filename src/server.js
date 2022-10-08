@@ -11,8 +11,10 @@ const payment = require("./Payment/index");
 const cors = require("cors");
 const server = express();
 const listEndpoints = require("express-list-endpoints");
+var session = require("express-session");
 
 const port = process.env.PORT || 3002;
+// server.use(session({ secret: "keyboard cat", cookie: { maxAge: 60000 } }));
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: false }));
 server.use(function (req, res, next) {

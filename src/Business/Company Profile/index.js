@@ -152,7 +152,6 @@ router.get("/all-deals", async (req, res) => {
     allCompanies.map((deal) => {
       return deals.push(...deal.deals);
     });
-    console.log(deals);
     res.send(deals);
   } catch (e) {
     console.log(e);

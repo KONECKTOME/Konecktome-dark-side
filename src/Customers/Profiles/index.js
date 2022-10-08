@@ -15,9 +15,6 @@ const cloudinary = require("../../Services/Cloudinary/cloudinary");
 const moment = require("moment");
 const validator = require("../../Services/Validators/validator");
 const bcrypt = require("bcryptjs");
-const {
-  default: ContactRestfulModelCollection,
-} = require("nylas/lib/models/contact-restful-model-collection");
 
 router.get("/", async (req, res) => {
   try {
@@ -30,8 +27,12 @@ router.get("/", async (req, res) => {
 
 router.get("/get-user-by-id/:userId", async (req, res) => {
   try {
+    const { userId } = req.params.userId;
+
     const allUsers = await usersModel.findById(req.params.userId);
-    res.send(allUsers).status(200);
+    res.send(allUsers);
+
+    // console.log("foineone", await usersModel.findOne({ userId }));
   } catch (error) {
     console.log(error);
   }
@@ -112,6 +113,7 @@ router.post("/sign-up", async (req, res) => {
 
 router.post("/pin-for-OAuth", async (req, res) => {
   const { email, newPin } = req.body;
+
   const user = await usersModel.find({ email: email });
   if (user) {
     const hashedPin = await bcrypt.hash(newPin, 8);
@@ -131,6 +133,7 @@ router.post("/pin-for-OAuth", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
+    var session = req.session;
     const { email, password } = req.body;
     const user = await usersModel.findByCredentials(email, password);
     if (!user) {
