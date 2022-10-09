@@ -12,7 +12,7 @@ const userProfile = new Schema({
     // required: true,
     minlength: 7,
   },
-  changePasswordToken: { type: String },
+  changePasswordToken: { type: String, default: "000000" },
   stripeCustId: { type: String },
   phone: { type: Number },
   pin: { type: String, default: "0000" },

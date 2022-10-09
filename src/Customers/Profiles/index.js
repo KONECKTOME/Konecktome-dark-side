@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const usersModel = require("./schema");
 const companyModel = require("../../Business/Company Profile/schema");
-
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.KONECKTOME_HELLO);
 const {
   refreshToken,
   generateToken,
@@ -28,11 +29,8 @@ router.get("/", async (req, res) => {
 router.get("/get-user-by-id/:userId", async (req, res) => {
   try {
     const { userId } = req.params.userId;
-
     const allUsers = await usersModel.findById(req.params.userId);
     res.send(allUsers);
-
-    // console.log("foineone", await usersModel.findOne({ userId }));
   } catch (error) {
     console.log(error);
   }
@@ -133,9 +131,10 @@ router.post("/pin-for-OAuth", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    var session = req.session;
     const { email, password } = req.body;
+    console.log(password);
     const user = await usersModel.findByCredentials(email, password);
+
     if (!user) {
       res.json({ newAccessToken: "Email or pass incorrect" });
     } else if (user) {
@@ -177,13 +176,35 @@ router.post("/forgot-password", async (req, res) => {
     const { email } = req.body;
     const user = await usersModel.findOne({ email });
     if (user) {
-      var token = require("crypto").randomBytes(10).toString("hex");
+      var token = require("crypto").randomBytes(3).toString("hex");
       const addToken = await usersModel.findOneAndUpdate(
         { _id: user._id },
         { changePasswordToken: token }
       );
+      if (addToken) {
+        const msg = {
+          to: email,
+          from: "hello@konecktome.com",
+          subject: "RESET CREDENTIALS",
+          html: `<div>
+      <h3>Hi ${user.firstName}, here's your reset pin ${token}</h3>
+      <p>Please enter it on the platform to reset your credential </p>
+      </div>`,
+        };
+        sgMail
+          .send(msg)
+          .then(async () => {
+            res.json({
+              message: "Email sent",
+            });
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+    } else {
       res.json({
-        message: "Token generated",
+        message: "User not found",
       });
     }
   } catch (error) {
@@ -193,21 +214,43 @@ router.post("/forgot-password", async (req, res) => {
 
 router.post("/validate-forgot-password-token", async (req, res) => {
   try {
-    const { changePasswordToken, newPassword } = req.body;
-    const user = await usersModel.findOne({ changePasswordToken });
+    const { changePasswordToken, newPassword, newPin, email } = req.body;
+    const user = await usersModel.findOne({ email });
     if (user) {
-      const resetPassword = await usersModel.findOneAndUpdate(
-        { _id: user._id },
-        { password: newPassword }
+      let usersInArr = [];
+      usersInArr.push(user);
+      validateToken = usersInArr.filter(
+        (tt) => tt.changePasswordToken === changePasswordToken
       );
-      if (resetPassword) {
-        const removePasswordToken = await usersModel.findOneAndUpdate(
-          { _id: user._id },
-          { changePasswordToken: "" }
-        );
-        res.json({
-          message: "Reset successful",
-        });
+      console.log(validateToken);
+      if (validateToken.length !== 0) {
+        if (newPassword) {
+          const hashedPassword = await bcrypt.hash(newPassword, 8);
+          const resetPassword = await usersModel.findOneAndUpdate(
+            { _id: user._id },
+            { password: hashedPassword },
+            { changePasswordToken: "000000" }
+          );
+          if (resetPassword) {
+            res.json({
+              message: "Password Reset successful",
+            });
+          }
+        } else if (newPin) {
+          const hashedPin = await bcrypt.hash(newPin, 8);
+          const resetPin = await usersModel.findOneAndUpdate(
+            { _id: user._id },
+            { pin: hashedPin },
+            { changePasswordToken: "000000" }
+          );
+          if (resetPin) {
+            res.json({
+              message: "Pin Reset successful",
+            });
+          }
+        }
+      } else {
+        res.json({ message: "Invalid token" });
       }
     }
   } catch (error) {
@@ -216,17 +259,50 @@ router.post("/validate-forgot-password-token", async (req, res) => {
 });
 
 router.post("/forgot-pin", async (req, res) => {
-  const { email } = req.body;
-  const user = await usersModel.findOne({ email });
+  try {
+    const { email } = req.body;
+    const user = await usersModel.findOne({ email });
+    if (user) {
+      const randomPin = Math.floor(1000 + Math.random() * 9000);
+      const resetPin = await usersModel.findOneAndUpdate(
+        { _id: user._id },
+        { pin: randomPin }
+      );
+      res.json({
+        message: "Pin sent to email",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/feedback", async (req, res) => {
+  const { userId, feedBackTitle, feedBackMessage } = req.body;
+  const user = await usersModel.findById(userId);
+  console.log(userId);
+  console.log(feedBackMessage);
   if (user) {
-    const randomPin = Math.floor(1000 + Math.random() * 9000);
-    const resetPin = await usersModel.findOneAndUpdate(
-      { _id: user._id },
-      { pin: randomPin }
-    );
-    res.json({
-      message: "Pin sent to email",
-    });
+    const msg = {
+      to: "hello@konecktome.com",
+      from: "timothy.mide@konecktome.com",
+      subject: `Feedback from user. Email:${user.email}`,
+      html: `<div>
+        <h3>Hi Koneckome handler, you have a feedback message</h3>
+        <p>Title: ${feedBackTitle}</p>
+        <p>Message: ${feedBackMessage}</p>
+        </div>`,
+    };
+    sgMail
+      .send(msg)
+      .then(async () => {
+        res.json({
+          message: "Email sent",
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 });
 
