@@ -11,4 +11,12 @@ const uploads = (file) => {
   return cloudinary.uploader.upload(file, function (error, result) {});
 };
 
-module.exports = { uploads };
+const companyProfileUploads = (file) => {
+  return cloudinary.uploader.unsigned_upload(
+    file,
+    "ws2kzqz2",
+    function (error, result) {}
+  );
+};
+
+module.exports = { uploads, companyProfileUploads };

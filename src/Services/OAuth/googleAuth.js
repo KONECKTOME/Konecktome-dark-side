@@ -17,12 +17,14 @@ module.exports = async (passport, res, req) => {
         {
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: "http://localhost:3002/users/auth/google/callback",
+          callbackURL: "http://localhost:3003/users/auth/google/callback",
         },
-        async (request, accessToken, refreshToken, profile, done) => {  
+        async (accessToken, refreshToken, profile, done) => {
           const user = await userProfile.find({
             email: profile.emails[0].value,
-          });    
+          });
+          console.log("user", user);
+
           if (user.length !== 0) {
             return done(null, { userId: user[0]._id });
           } else {

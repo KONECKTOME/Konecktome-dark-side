@@ -133,6 +133,13 @@ const userProfile = new Schema({
       description: { type: String },
     },
   ],
+  feedback: [
+    {
+      date: { type: String },
+      title: { type: String },
+      message: { type: String },
+    },
+  ],
   notifications: [
     {
       message: { type: String },

@@ -222,7 +222,6 @@ router.post("/validate-forgot-password-token", async (req, res) => {
       validateToken = usersInArr.filter(
         (tt) => tt.changePasswordToken === changePasswordToken
       );
-      console.log(validateToken);
       if (validateToken.length !== 0) {
         if (newPassword) {
           const hashedPassword = await bcrypt.hash(newPassword, 8);
@@ -234,6 +233,7 @@ router.post("/validate-forgot-password-token", async (req, res) => {
           if (resetPassword) {
             res.json({
               message: "Password Reset successful",
+              userId: user._id,
             });
           }
         } else if (newPin) {
@@ -279,9 +279,11 @@ router.post("/forgot-pin", async (req, res) => {
 
 router.post("/feedback", async (req, res) => {
   const { userId, feedBackTitle, feedBackMessage } = req.body;
-  const user = await usersModel.findById(userId);
-  console.log(userId);
-  console.log(feedBackMessage);
+  let user = await usersModel.findById(userId);
+  const date = new Date();
+  let day = date.getDate();
+  let month = date.getMonth() + 1;
+  let year = date.getFullYear();
   if (user) {
     const msg = {
       to: "hello@konecktome.com",
@@ -296,6 +298,12 @@ router.post("/feedback", async (req, res) => {
     sgMail
       .send(msg)
       .then(async () => {
+        user.feedback.push({
+          date: day + "-" + month + "-" + year,
+          title: feedBackTitle,
+          message: feedBackMessage,
+        });
+        user = await user.save();
         res.json({
           message: "Email sent",
         });
@@ -956,7 +964,10 @@ router.post("/update-family-members", async (req, res) => {
 router.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["email", "profile"] }),
-  (req, res) => {}
+  (req, res) => {
+    console.log(res);
+    console.log("req", req);
+  }
 );
 
 router.get(
@@ -966,6 +977,7 @@ router.get(
   }),
   (req, res, next) => {
     try {
+      console.log(req.user);
       res.redirect(`http://localhost:3000/dashboard/${req.user.userId}`);
       res.end();
     } catch (e) {
@@ -1102,7 +1114,6 @@ router.post("/update-transaction-history", async (req, res) => {
           },
         ],
       });
-      console.log(findUser.transactionHistory);
       findUser = await findUser.save();
       res.json({
         message: {

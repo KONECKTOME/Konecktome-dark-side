@@ -1,5 +1,39 @@
 const router = require("express").Router();
 const companyModel = require("./schema");
+const multer = require("../../Services/Cloudinary/multer");
+const cloudinary = require("../../Services/Cloudinary/cloudinary");
+
+router.post(
+  "/image-upload/:companyId",
+  multer.single("image"),
+  async (req, res) => {
+    try {
+      const result = await cloudinary.companyProfileUploads(req.file.path);
+      if (result) {
+        const updateImage = await companyModel.findByIdAndUpdate(
+          { _id: req.params.companyId },
+          { companyLogo: result.url }
+        );
+
+        if (updateImage) {
+          res.json({
+            message: "Image added successfully",
+          });
+        } else {
+          res.json({
+            message: "An error occured while uploading image",
+          });
+        }
+      } else {
+        res.json({
+          message: "An error occured while uploading image",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 router.get("/", async (req, res) => {
   try {
@@ -18,12 +52,12 @@ router.post("/add-new-company", async (req, res) => {
     addressLine2,
     postCode,
     phoneNumber,
-    companyLogo,
     companyWebsite,
     trustPilotRating,
     email,
   } = req.body;
   const company = await companyModel.find({ companyName: companyName });
+
   if (company.length > 0) {
     res.json({
       message: "Company already exists",
@@ -32,7 +66,6 @@ router.post("/add-new-company", async (req, res) => {
     const newCompany = await companyModel.create({
       companyName,
       companyDescription,
-      companyLogo,
       companyWebsite,
       trustPilotRating,
       companyContactDetails: [
