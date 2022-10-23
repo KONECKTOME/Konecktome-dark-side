@@ -23,6 +23,7 @@ const userProfile = new Schema({
   gender: { type: String },
   facebookId: { type: Number },
   meets3yearMargin: { type: Boolean },
+  pinHasBeenSet: { type: Boolean, default: false },
   moreInfoNeeded: { type: Boolean, default: true },
   splitBillFamilyMembers: [
     {
@@ -119,6 +120,7 @@ const userProfile = new Schema({
           postCode: { type: String },
         },
       ],
+      serviceProviderLogo: { type: String },
     },
   ],
   wishlist: [
@@ -128,7 +130,7 @@ const userProfile = new Schema({
       companyImage: { type: String },
       dealName: { type: String },
       serviceProviderName: { type: String },
-      serviceType: { type: String },
+      tag: { type: String },
       price: { type: Number },
       description: { type: String },
     },

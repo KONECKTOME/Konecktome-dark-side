@@ -111,13 +111,12 @@ router.post("/sign-up", async (req, res) => {
 
 router.post("/pin-for-OAuth", async (req, res) => {
   const { email, newPin } = req.body;
-
   const user = await usersModel.find({ email: email });
   if (user) {
     const hashedPin = await bcrypt.hash(newPin, 8);
     const updatePin = await usersModel.findOneAndUpdate(
       { _id: user[0]._id },
-      { pin: hashedPin }
+      { pin: hashedPin, pinHasBeenSet: true }
     );
     if (updatePin) {
       res.json({ message: "Pin Updated" });
@@ -132,9 +131,7 @@ router.post("/pin-for-OAuth", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(password);
     const user = await usersModel.findByCredentials(email, password);
-
     if (!user) {
       res.json({ newAccessToken: "Email or pass incorrect" });
     } else if (user) {
@@ -811,14 +808,8 @@ router.post("/update-wishlist", async (req, res) => {
   try {
     const {
       userId,
-      companyId,
+
       dealId,
-      companyImage,
-      dealName,
-      serviceProviderName,
-      serviceType,
-      price,
-      description,
     } = req.body;
     let findUser = await usersModel.findById(userId);
     if (findUser) {
@@ -830,17 +821,29 @@ router.post("/update-wishlist", async (req, res) => {
           message: "Item Already In Wishlist",
         });
       } else {
+        let deals = [];
+        const allCompanies = await companyModel.find();
+        allCompanies.map((deal) => {
+          return deals.push(...deal.deals);
+        });
+        const singleDeal = deals.filter(
+          (d) => JSON.stringify(d._id) === JSON.stringify(dealId)
+        );
+        let company = await companyModel.findOne({
+          companyName: singleDeal[0].companyName,
+        });
         findUser.wishlist.push({
-          companyId,
+          companyId: company._id,
           dealId,
-          companyImage,
-          dealName,
-          serviceProviderName,
-          serviceType,
-          price,
-          description,
+          companyImage: company.companyLogo,
+          dealName: singleDeal[0].dealName,
+          serviceProviderName: company.companyName,
+          tag: singleDeal[0].tag,
+          price: singleDeal[0].dealPrice,
+          description: "test",
         });
         findUser = await findUser.save();
+
         res.json({
           message: "New wishlist added for user",
         });
@@ -1063,7 +1066,6 @@ router.post("/update-transaction-history", async (req, res) => {
   try {
     const {
       dealId,
-      nextDueDate,
       userId,
       deliveryAddressLine1,
       deliveryAddressLine2,
@@ -1100,8 +1102,8 @@ router.post("/update-transaction-history", async (req, res) => {
         dateOfTransaction: todayDate,
         timeOfTransaction: time,
         nextDueDate: "test",
-        subscriptionPrice: singleDeal[0].dealContractPlans.setUpFee,
-        oneOffPrice: singleDeal[0].dealPrice,
+        subscriptionPrice: singleDeal[0].dealPrice,
+        oneOffPrice: singleDeal[0].dealContractPlans.setUpFee,
         description: "test",
         installationDateAndTime: "test",
         deliveryAddress: [
@@ -1113,6 +1115,17 @@ router.post("/update-transaction-history", async (req, res) => {
             postCode: "test",
           },
         ],
+        serviceProviderLogo: company.companyLogo,
+      });
+      findUser.accounts.push({
+        companyId: company._id,
+        companyImage: company.companyLogo,
+        dealName: singleDeal[0].dealName,
+        serviceProviderName: company.companyName,
+        tag: singleDeal[0].tag,
+        joinDate: todayDate,
+        description: "TEst",
+        price: singleDeal[0].dealPrice,
       });
       findUser = await findUser.save();
       res.json({
