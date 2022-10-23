@@ -97,7 +97,6 @@ router.post("/sign-up", async (req, res) => {
           lastName: lastNameCap,
           email,
           password,
-          pin,
         });
         res.status(201).json({
           id: newUser._id,
