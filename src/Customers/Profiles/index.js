@@ -75,32 +75,105 @@ router.put("/edit-user", async (req, res) => {
     console.log(e);
   }
 });
-router.post("/sign-up", async (req, res) => {
+router.post("/sign-up/:fromSignUp", async (req, res) => {
   try {
-    const { firstName, lastName, email, password, pin } = req.body;
-    if (validator.isValidEmail(email) === false) {
-      res.json({
-        message: "Invalid email",
-      });
-    } else {
-      const user = await usersModel.find({ email: email });
-      if (user.length > 0) {
+    if (req.params.fromSignUp === "yes") {
+      const { firstName, lastName, email, password } = req.body;
+      if (validator.isValidEmail(email) === false) {
         res.json({
-          message: "Email already exists",
+          message: "Invalid email",
         });
       } else {
-        let firstNameCap =
-          firstName.charAt(0).toUpperCase() + firstName.slice(1);
-        let lastNameCap = lastName.charAt(0).toUpperCase() + lastName.slice(1);
-        const newUser = await usersModel.create({
-          firstName: firstNameCap,
-          lastName: lastNameCap,
-          email,
-          password,
-        });
-        res.status(201).json({
-          id: newUser._id,
-        });
+        const user = await usersModel.find({ email: email });
+
+        if (user.length > 0) {
+          res.json({
+            message: "Email already exists",
+          });
+        } else {
+          let firstNameCap =
+            firstName.charAt(0).toUpperCase() + firstName.slice(1);
+          let lastNameCap =
+            lastName.charAt(0).toUpperCase() + lastName.slice(1);
+          const newUser = await usersModel.create({
+            firstName: firstNameCap,
+            lastName: lastNameCap,
+            email,
+            password,
+          });
+          console.log(newUser);
+          res.status(201).json({
+            id: newUser._id,
+          });
+        }
+      }
+    } else if (req.params.fromSignUp === "no") {
+      const {
+        firstName,
+        lastName,
+        email,
+        userId,
+        dob,
+        profession,
+        phone,
+        gender,
+      } = req.body;
+      let findUser = await usersModel.findById(userId);
+
+      if (findUser) {
+        if (validator.isValidEmail(email) === false) {
+          res.json({
+            message: "Invalid email",
+          });
+        } else {
+          let dateOfBirth = dob.split("-");
+          let dateOfBirthInArray = [];
+          let currDateInArr = [];
+          dateOfBirth.forEach((str) => {
+            return dateOfBirthInArray.push(Number(str));
+          });
+          let currDate = new Date().toLocaleDateString().split("/").reverse();
+          currDate.forEach((str) => {
+            return currDateInArr.push(Number(str));
+          });
+
+          let differenceInDates = moment(currDateInArr).diff(
+            moment(dateOfBirthInArray),
+            "months"
+          );
+          let age = differenceInDates / 12;
+
+          if (age < 18) {
+            res.json({
+              message: "Age Cannot Be Less Than 18",
+            });
+          } else {
+            let updateUser = await usersModel.findOneAndUpdate(
+              { _id: userId },
+              {
+                firstName,
+                lastName,
+                email,
+                dob,
+                profession,
+                phone,
+                gender,
+                age: parseInt(age),
+                moreInfoNeeded: false,
+              }
+            );
+            updateUser = await updateUser.save();
+            if (updateUser) {
+              res.json({
+                message: "User updated",
+              });
+            } else {
+              res.json({
+                message: "Error",
+              });
+            }
+          }
+        }
       }
     }
   } catch (error) {
