@@ -65,8 +65,8 @@ router.post("/create-product-price", async (req, res) => {
         billing_address_collection: "auto",
         line_items: lineItemsArr,
         mode: "subscription",
-        success_url: `https://konecktome-mvp.herokuapp.com/dashboard/pay-success/${userId}/${dealId}`,
-        cancel_url: "https://konecktome-mvp.herokuapp.com/payment/fail",
+        success_url: `http://localhost:3000/dashboard/pay-success/${userId}/${dealId}`,
+        cancel_url: "http://localhost:3000/payment/fail",
       });
       if (session.url) {
         res

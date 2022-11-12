@@ -90,6 +90,8 @@ router.post("/sign-up/:fromSignUp", async (req, res) => {
           res.json({
             message: "Email already exists",
           });
+        } else if (password.length < 7) {
+          res.json({ message: "Less Than 7" });
         } else {
           let firstNameCap =
             firstName.charAt(0).toUpperCase() + firstName.slice(1);
@@ -101,7 +103,7 @@ router.post("/sign-up/:fromSignUp", async (req, res) => {
             email,
             password,
           });
-          console.log(newUser);
+
           res.status(201).json({
             id: newUser._id,
           });
