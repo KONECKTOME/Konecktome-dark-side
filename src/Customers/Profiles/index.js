@@ -120,6 +120,7 @@ router.post("/sign-up/:fromSignUp", async (req, res) => {
         phone,
         gender,
       } = req.body;
+      console.log(dob);
       let findUser = await usersModel.findById(userId);
 
       if (findUser) {
@@ -144,6 +145,8 @@ router.post("/sign-up/:fromSignUp", async (req, res) => {
             "months"
           );
           let age = differenceInDates / 12;
+          console.log(parseInt(age));
+          console.log(typeof age);
 
           if (age < 18) {
             res.json({
