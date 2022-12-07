@@ -67,7 +67,7 @@ const userProfile = new Schema({
   addressHistory: [
     {
       buildingName: { type: String },
-      addressLine1: { type: String },
+      addressLine1: { type: String, required: true },
       addressLine2: { type: String },
       town: { type: String },
       city: { type: String },

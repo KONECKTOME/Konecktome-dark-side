@@ -18,6 +18,17 @@ const validator = require("../../Services/Validators/validator");
 const bcrypt = require("bcryptjs");
 
 router.get("/", async (req, res) => {
+  // sess = req.session;
+  // const sessionUser = {
+  //   id: "testid",
+  //   username: "user.username",
+  //   email: "user.email",
+  // };
+  // sess.user = sessionUser;
+  // res.set("Set-Cookie", `session=${req.sessionID}`);
+
+  // console.log(req.sessionID);
+
   try {
     const allUsers = await usersModel.find();
     res.send(allUsers).status(200);
@@ -120,34 +131,40 @@ router.post("/sign-up/:fromSignUp", async (req, res) => {
         phone,
         gender,
       } = req.body;
-      console.log(dob);
       let findUser = await usersModel.findById(userId);
-
       if (findUser) {
         if (validator.isValidEmail(email) === false) {
           res.json({
             message: "Invalid email",
           });
         } else {
-          let dateOfBirth = dob.split("-");
-          let dateOfBirthInArray = [];
-          let currDateInArr = [];
-          dateOfBirth.forEach((str) => {
-            return dateOfBirthInArray.push(Number(str));
-          });
-          let currDate = new Date().toLocaleDateString().split("/").reverse();
-          currDate.forEach((str) => {
-            return currDateInArr.push(Number(str));
-          });
-
-          let differenceInDates = moment(currDateInArr).diff(
-            moment(dateOfBirthInArray),
-            "months"
+          let dateOfBirth = moment(
+            dob.split("-").reverse().join(""),
+            "DD-MM-YYYY"
           );
-          let age = differenceInDates / 12;
-          console.log(parseInt(age));
-          console.log(typeof age);
+          let currDate = moment(new Date().toLocaleDateString(), "DD-MM-YYYY");
+          // let dateOfBirthInArray = [];
+          // let currDateInArr = [];
+          // dateOfBirth.forEach((str) => {
+          //   return dateOfBirthInArray.push(Number(str));
+          // });
+          // let currDate = new Date().toLocaleDateString().split("/").reverse();
+          // currDate.forEach((str) => {
+          //   return currDateInArr.push(Number(str));
+          // });
 
+          // let differenceInDates = moment(currDateInArr).diff(
+          //   moment(dateOfBirthInArray),
+          //   "months"
+          // );
+
+          // var startDate = moment(
+          //   dob.split("-").reverse().join(""),
+          //   "DD-MM-YYYY"
+          // );
+          // var endDate = moment(new Date().toLocaleDateString(), "DD-MM-YYYY");
+
+          var age = currDate.diff(dateOfBirth, "years");
           if (age < 18) {
             res.json({
               message: "Age Cannot Be Less Than 18",
@@ -163,7 +180,7 @@ router.post("/sign-up/:fromSignUp", async (req, res) => {
                 profession,
                 phone,
                 gender,
-                age: parseInt(age),
+                age: age,
                 moreInfoNeeded: false,
               }
             );
@@ -473,7 +490,7 @@ router.post("/update-address", async (req, res) => {
     let {
       userId,
       addressId,
-      buildingName,
+      // buildingName,
       addressLine1,
       addressLine2,
       town,
@@ -527,7 +544,7 @@ router.post("/update-address", async (req, res) => {
               meets3yearMargin: true,
             }
           );
-          addressItem.buildingName = buildingName;
+          // addressItem.buildingName = buildingName;
           addressItem.addressLine1 = addressLine1;
           addressItem.addressLine2 = addressLine2;
           addressItem.town = town;
@@ -547,7 +564,7 @@ router.post("/update-address", async (req, res) => {
           (addressItem.durationOfStayInMonths = differenceInDates),
             (findUser.addressHistory[itemIndex] = addressItem);
         } else {
-          addressItem.buildingName = buildingName;
+          // addressItem.buildingName = buildingName;
           addressItem.addressLine1 = addressLine1;
           addressItem.addressLine2 = addressLine2;
           addressItem.town = town;
@@ -608,7 +625,7 @@ router.post("/update-address", async (req, res) => {
               }
             );
             findUser.addressHistory.push({
-              buildingName,
+              // buildingName,
               addressLine1,
               addressLine2,
               town,
@@ -633,7 +650,7 @@ router.post("/update-address", async (req, res) => {
             });
           } else {
             findUser.addressHistory.push({
-              buildingName,
+              // buildingName,
               addressLine1,
               addressLine2,
               town,
@@ -699,7 +716,7 @@ router.post("/update-address", async (req, res) => {
               }
             );
             findUser.addressHistory.push({
-              buildingName,
+              // buildingName,
               addressLine1,
               addressLine2,
               town,
@@ -724,7 +741,7 @@ router.post("/update-address", async (req, res) => {
             });
           } else {
             findUser.addressHistory.push({
-              buildingName,
+              // buildingName,
               addressLine1,
               addressLine2,
               town,
