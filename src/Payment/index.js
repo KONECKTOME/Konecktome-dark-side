@@ -21,13 +21,16 @@ router.post("/create-product-price", async (req, res) => {
     let custID = "";
     let productId = "";
     let findUser = await usersModel.findById(userId);
+
     let findProduct = await paymentModel.findOne({ productName: productName });
+
     if (findProduct) {
       productId = findProduct.stripeProductId;
     } else if (!findProduct) {
       const product = await stripe.products.create({ name: productName });
       productId = product.id;
     }
+
     if (!findUser.stripeCustId) {
       const customer = await stripe.customers.create({
         email: findUser.email,
@@ -42,8 +45,13 @@ router.post("/create-product-price", async (req, res) => {
       findUser = await findUser.save();
     } else {
       custID = findUser.stripeCustId;
+      let retreiveCustomer = await stripe.customers.retrieve(custID);
+      if (findUser.email !== retreiveCustomer.email) {
+        const updateCustomer = await stripe.customers.update(custID, {
+          email: findUser.email,
+        });
+      }
     }
-
     if (custID !== "") {
       const subscriptionPrice = await stripe.prices.create({
         unit_amount: subscribeInPence,
