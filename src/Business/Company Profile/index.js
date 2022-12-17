@@ -2,6 +2,7 @@ const router = require("express").Router();
 const companyModel = require("./schema");
 const multer = require("../../Services/Cloudinary/multer");
 const cloudinary = require("../../Services/Cloudinary/cloudinary");
+const userModel = require("../../../src/Customers/Profiles/schema");
 
 router.post(
   "/image-upload/:companyId",
@@ -206,6 +207,27 @@ router.get("/get-deal-by-id/:dealId", async (req, res) => {
     });
   } catch (e) {
     console.log(e);
+  }
+});
+
+router.post("/update-reviews", async (req, res) => {
+  try {
+    const { userId, companyId, rating, comment } = req.body;
+    let findUser = await userModel.findById(userId);
+    let company = await companyModel.findById(companyId);
+    if (company) {
+      company.reviews.push({
+        reviewerName: findUser.firstName + " " + findUser.lastName,
+        rating,
+        comment,
+      });
+      company = await company.save();
+      res.json({
+        message: "New review added",
+      });
+    }
+  } catch (error) {
+    console.log(error);
   }
 });
 

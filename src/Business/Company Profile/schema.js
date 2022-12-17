@@ -41,6 +41,13 @@ const companyProfile = new Schema({
       features: [],
     },
   ],
+  reviews: [
+    {
+      reviewerName: { type: String },
+      rating: { type: Number },
+      comment: { type: String },
+    },
+  ],
 });
 
 const companyProfileModel = model("company-profile", companyProfile);

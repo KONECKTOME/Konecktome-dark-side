@@ -18,17 +18,6 @@ const validator = require("../../Services/Validators/validator");
 const bcrypt = require("bcryptjs");
 
 router.get("/", async (req, res) => {
-  // sess = req.session;
-  // const sessionUser = {
-  //   id: "testid",
-  //   username: "user.username",
-  //   email: "user.email",
-  // };
-  // sess.user = sessionUser;
-  // res.set("Set-Cookie", `session=${req.sessionID}`);
-
-  // console.log(req.sessionID);
-
   try {
     const allUsers = await usersModel.find();
     res.send(allUsers).status(200);
@@ -36,6 +25,19 @@ router.get("/", async (req, res) => {
     console.log(error);
   }
 });
+
+// router.get("/", async (req, res) => {
+//   try {
+//     let user = {
+//       _id: "62ee5e92cbea2e03cebc900c",
+//     };
+//     const tokens = await generateToken(user);
+//     res.cookie("token", tokens.newAccessToken, { httpOnly: true });
+
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
 
 router.get("/get-user-by-id/:userId", async (req, res) => {
   try {

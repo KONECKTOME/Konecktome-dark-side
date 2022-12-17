@@ -11,18 +11,23 @@ const payment = require("./Payment/index");
 const cors = require("cors");
 const server = express();
 const listEndpoints = require("express-list-endpoints");
+var session = require("express-session");
+const cookieParser = require("cookie-parser");
 
 const port = process.env.PORT || 3003;
-// server.use(session({ secret: "keyboard cat", cookie: { maxAge: 60000 } }));
+
 server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({ extended: false }));
-server.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*"); // disabled for security on local
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  next();
-});
-server.use(express.json());
+
+// server.use(
+//   cors({
+//     origin: "http://localhost:3000",
+//     methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
+//     credentials: true,
+//   })
+// );
 server.use(cors());
+server.use(express.json());
+
 server.use("/users", users);
 server.use("/companies", companies);
 server.use("/crawler", crawler);
@@ -30,6 +35,7 @@ server.use("/transactions", transactions);
 server.use("/payment", payment);
 server.use("/mail", mailList);
 server.use("/reporting", report);
+
 // console.log("endpoints", listEndpoints(server));
 
 // var token = require("crypto").randomBytes(10).toString("hex");

@@ -7,12 +7,9 @@ const authorize = async (req, res, next) => {
   try {
     // const token = req.cookies.token;
     const token = req.headers.authorization.replace("Bearer ", "");
-
     if (token) {
       const credentials = await verifyJWT(token);
-
       const user = await profileModel.findById(credentials._id);
-
       if (user) {
         // req.user = user;
         res.json({
@@ -41,4 +38,4 @@ const adminOnlyMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = { authorize, adminOnlyMiddleware };
+module.exports = { authorize };
