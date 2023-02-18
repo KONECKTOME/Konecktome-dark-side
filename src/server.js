@@ -1,8 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const mailList = require("./mailing-list/index");
-const report = require("./Reports/index");
+const affiliate = require("../src/Affiliate/index");
 const cors = require("cors");
 const server = express();
 const port = process.env.PORT || 3002;
@@ -10,8 +9,8 @@ server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(express.json());
 server.use(cors());
-server.use("/mail", mailList);
-server.use("/reporting", report);
+
+server.use("/aff", affiliate);
 
 mongoose
   .connect(
