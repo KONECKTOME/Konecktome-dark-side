@@ -6,9 +6,11 @@ router.get("/", async (req, res) => {
     let deals = [];
     const allDeals = await affiliateModel.find();
     allDeals.map((deal) => {
-      return deals.push(deal.deals);
+      return deals.push(...deal.deals);
     });
-    res.send(deals);
+    res.json({
+      message: deals,
+    });
   } catch (error) {
     console.log(error);
   }
@@ -17,26 +19,46 @@ router.get("/", async (req, res) => {
 router.post("/new-brand", async (req, res) => {
   const {
     brandName,
-    title,
+    brandDescription,
+    brandId,
+    Brand,
+    Type,
+    Name,
+    Speed,
+    Contract,
+    Downloads,
+    Calls,
+    VAT,
+    Setup,
+    Price,
+    Offers,
+    OfferPrice,
+    Benefits,
+    url,
     image,
-    price,
-    priceSubSection,
-    duration,
-    promotions,
-    features,
   } = req.body;
   try {
     const newBrand = await affiliateModel.create({
       brandName,
+      brandDescription,
       deals: [
         {
-          promotions,
-          title,
+          brandId,
+          Brand,
+          Type,
+          Name,
+          Speed,
+          Contract,
+          Downloads,
+          Calls,
+          VAT,
+          Setup,
+          Price,
+          Offers,
+          OfferPrice,
+          Benefits,
+          url,
           image,
-          price,
-          priceSubSection,
-          features,
-          duration,
         },
       ],
     });
@@ -60,18 +82,22 @@ router.post("/add-new-deal", async (req, res) => {
   try {
     let brand = await affiliateModel.findById(brandId);
     if (brand) {
-      brand.deals.push({
-        title,
-        image,
-        price,
-        priceSubSection,
-        duration,
-        promotions,
-        features,
-      });
+      brand.deals.push({});
       brand = await brand.save();
       res.send("Deal Added for brand");
     }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/brand-details", async (req, res) => {
+  try {
+    let { brandId } = req.body;
+    let brand = await affiliateModel.findById(brandId);
+    res.json({
+      message: brand,
+    });
   } catch (error) {
     console.log(error);
   }
