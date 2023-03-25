@@ -18,7 +18,7 @@ const affiliateSchema = new Schema({
       Setup: { type: String },
       Price: { type: Number },
       Offers: { type: String },
-      s: { type: String },
+      OfferPrice: { type: String },
       Benefits: [],
       url: { type: String },
       image: { type: String },

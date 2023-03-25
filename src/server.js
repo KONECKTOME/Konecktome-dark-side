@@ -4,9 +4,11 @@ const bodyParser = require("body-parser");
 const affiliate = require("../src/Affiliate/index");
 const article = require("../src/Article/index");
 const tracking = require("../src/Tracking/index");
+const impressions = require("../src/Impressions/index");
 const cors = require("cors");
 const server = express();
 const port = process.env.PORT || 3002;
+
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(express.json());
@@ -15,6 +17,7 @@ server.use(cors());
 server.use("/aff", affiliate);
 server.use("/article", article);
 server.use("/tracking", tracking);
+server.use("/impressions", impressions);
 
 mongoose
   .connect(
